@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>IT職業分類轉盤</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="wheel-container">
+    <div class="wheel" id="wheel">
+      <div class="center-logo">
+        < img src="redbridge-logo.png" alt="Red Bridge Logo">
+      </div>
+
+      <div class="sector it" onclick="toggleDetails()">
+        <h3>💻 IT & Technology</h3>
+        <ul id="it-list" class="hidden">
+          <li>232414 Web Designer</li>
+          <li>261313 Software Engineer</li>
+          <li>261111 ICT Business Analyst</li>
+          <li>261311 Analyst Programmer</li>
+          <li>261312 Developer Programmer</li>
+        </ul>
+      </div>
+    </div>
+
+    <button onclick="spinWheel()">🔁 旋轉轉盤</button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
