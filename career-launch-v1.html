@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Career Launch - Timeline</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* TIMELINE SPECIFIC CSS */
+        .timeline-section { position: relative; padding: 4rem 0; }
+        .timeline-line { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: #333; transform: translateX(-50%); }
+        .timeline-row { display: flex; justify-content: space-between; margin-bottom: 4rem; position: relative; }
+        .timeline-row:last-child { margin-bottom: 0; }
+        .timeline-content { width: 45%; background: var(--card-bg); padding: 2rem; border-radius: 12px; border: 1px solid var(--border-color); position: relative; }
+        .timeline-date { position: absolute; top: 2rem; width: 80px; text-align: center; background: var(--bg-dark); border: 1px solid var(--primary-orange); color: var(--primary-orange); padding: 5px; border-radius: 4px; font-weight: bold; font-size: 0.9rem; }
+        
+        /* Alternating Logic */
+        .timeline-row:nth-child(odd) .timeline-content { margin-right: auto; }
+        .timeline-row:nth-child(even) .timeline-content { margin-left: auto; }
+        .timeline-row:nth-child(odd) .timeline-date { right: -13%; }
+        .timeline-row:nth-child(even) .timeline-date { left: -13%; }
+        
+        /* Connector Dot */
+        .timeline-dot { position: absolute; left: 50%; top: 2.5rem; width: 20px; height: 20px; background: var(--primary-orange); border-radius: 50%; transform: translateX(-50%); z-index: 2; box-shadow: 0 0 10px rgba(230, 84, 0, 0.5); }
+
+        @media(max-width: 768px) {
+            .timeline-line { left: 20px; }
+            .timeline-row { flex-direction: column; padding-left: 50px; }
+            .timeline-content { width: 100%; }
+            .timeline-dot { left: 20px; }
+            .timeline-date { position: static; display: inline-block; margin-bottom: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">RedBridge Consulting</div>
+        <nav><ul class="nav-links"><li><a href="index.html">Home</a></li><li><a href="#">Services</a></li></ul></nav>
+    </header>
+
+    <section class="page-hero">
+        <h1>Your Roadmap to <br><span>Employment</span></h1>
+        <p>A structured 4-step journey from graduation to your first professional role.</p>
+    </section>
+
+    <section class="section-padding">
+        <div class="timeline-section">
+            <div class="timeline-line"></div>
+            
+            <div class="timeline-row reveal-on-scroll">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <div class="timeline-date">Month 1</div>
+                    <h3>Skill Gap Analysis</h3>
+                    <p>We analyze your university transcript and current skills against market requirements. We identify exactly what tools (Xero, AWS, Revit) you are missing.</p>
+                </div>
+            </div>
+
+            <div class="timeline-row reveal-on-scroll">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <div class="timeline-date">Month 2</div>
+                    <h3>Technical Training</h3>
+                    <p>Intensive bootcamp. You stop learning theory and start learning the actual software used in Australian firms. 4 weeks of hands-on practice.</p>
+                </div>
+            </div>
+
+            <div class="timeline-row reveal-on-scroll">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <div class="timeline-date">Month 3-5</div>
+                    <h3>Real Project Experience</h3>
+                    <p><strong>The Core Phase.</strong> You join a team to deliver a real project for a local client. 400+ hours of loggable work experience to satisfy skill assessments.</p>
+                </div>
+            </div>
+
+            <div class="timeline-row reveal-on-scroll">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <div class="timeline-date">Month 6</div>
+                    <h3>Placement & Reference</h3>
+                    <p>We build your portfolio, rewrite your CV with your new experience, provide a professional reference, and connect you with our hiring network.</p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <script src="script.js"></script>
+</body>
+</html>

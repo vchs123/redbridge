@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Career Launch - Bento</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* BENTO GRID CSS */
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(2, 300px);
+            gap: 20px;
+            max-width: 1200px; margin: 0 auto;
+        }
+        .bento-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2rem;
+            position: relative; overflow: hidden;
+            transition: 0.3s;
+            display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .bento-item:hover { transform: translateY(-5px); border-color: var(--primary-orange); }
+        .bento-large { grid-column: span 2; grid-row: span 2; background: linear-gradient(135deg, #1f1f1f 0%, #1a0800 100%); }
+        .bento-tall { grid-column: span 1; grid-row: span 2; }
+        .bento-wide { grid-column: span 2; }
+        
+        .bento-num { font-size: 4rem; font-weight: 800; color: var(--primary-orange); line-height: 1; }
+        .bento-icon { font-size: 2.5rem; color: #fff; margin-bottom: 1rem; }
+        
+        @media(max-width: 900px) {
+            .bento-grid { grid-template-columns: 1fr; grid-template-rows: auto; }
+            .bento-large, .bento-tall, .bento-wide { grid-column: span 1; grid-row: span 1; min-height: 250px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">RedBridge Consulting</div>
+        <nav><ul class="nav-links"><li><a href="index.html">Home</a></li><li><a href="#">Services</a></li></ul></nav>
+    </header>
+
+    <section class="page-hero">
+        <h1>More Than Just<br><span>An Internship</span></h1>
+        <p>A comprehensive ecosystem designed to launch your career.</p>
+    </section>
+
+    <section class="section-padding">
+        <div class="bento-grid reveal-on-scroll">
+            
+            <div class="bento-item bento-large">
+                <div>
+                    <h3>Real Experience</h3>
+                    <p>Work on live commercial projects, not simulations. Loggable hours for CPA/ACS.</p>
+                </div>
+                <div class="bento-num">400+</div>
+                <p>Hours of Paid-Equivalent Work</p>
+            </div>
+
+            <div class="bento-item bento-tall">
+                <i class="fas fa-user-tie bento-icon"></i>
+                <h3>Senior Mentors</h3>
+                <p>Weekly 1-on-1 sessions with Seniors from Big 4 firms and Tier 1 Tech companies.</p>
+                <button class="btn-outline" style="margin-top: auto;">Meet Them</button>
+            </div>
+
+            <div class="bento-item">
+                <i class="fas fa-tools bento-icon"></i>
+                <h3>Industry Tools</h3>
+                <p>Master Xero, SAP, AWS, Revit before you interview.</p>
+            </div>
+
+            <div class="bento-item">
+                <i class="fas fa-certificate bento-icon"></i>
+                <h3>Assessment</h3>
+                <p>100% Skill Assessment Guarantee.</p>
+            </div>
+        </div>
+    </section>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Career Launch Program | RedBridge</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    
+    <style>
+        /* PAGE SPECIFIC STYLES */
+        .tabs-header { display: flex; justify-content: center; gap: 15px; margin-bottom: 3rem; flex-wrap: wrap; }
+        .tab-btn { background: transparent; border: 1px solid #444; color: #888; padding: 12px 30px; border-radius: 50px; cursor: pointer; font-weight: 600; transition: 0.3s; font-size: 1rem; }
+        .tab-btn.active, .tab-btn:hover { background: var(--brand-gradient); color: #fff; border-color: transparent; box-shadow: 0 5px 15px rgba(230, 84, 0, 0.3); }
+        .tab-content { display: none; animation: fadeIn 0.5s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .role-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 20px; padding: 3rem; max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 2rem; }
+        @media(min-width: 768px) { .role-card { flex-direction: row; align-items: center; } }
+        .role-left { flex: 1; border-right: 1px solid #333; padding-right: 2rem; margin-right: 2rem; }
+        .role-right { flex: 1; }
+        @media(max-width: 768px) { .role-left { border-right: none; border-bottom: 1px solid #333; padding-right: 0; margin-right: 0; padding-bottom: 2rem; margin-bottom: 2rem; } }
+        
+        .tool-tag { display: inline-block; background: #333; padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; margin-right: 8px; margin-bottom: 8px; color: #ddd; border: 1px solid #444; }
+
+        .timeline-section { position: relative; max-width: 800px; margin: 0 auto; padding: 2rem 0; }
+        .timeline-line { position: absolute; left: 24px; top: 0; bottom: 0; width: 2px; background: linear-gradient(to bottom, var(--primary-orange), #333); z-index: 0; }
+        .timeline-row { display: flex; gap: 2rem; margin-bottom: 4rem; position: relative; z-index: 1; }
+        .timeline-dot { flex-shrink: 0; width: 50px; height: 50px; background: var(--card-bg); border: 2px solid var(--primary-orange); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.2rem; color: var(--primary-orange); box-shadow: 0 0 15px rgba(230, 84, 0, 0.2); }
+        .timeline-text h3 { font-size: 1.5rem; margin-bottom: 0.5rem; color: #fff; }
+        .timeline-text p { color: var(--text-gray); }
+        .timeline-date { color: var(--primary-orange); font-weight: 700; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px; margin-bottom: 5px; display: block; }
+
+        .bento-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; max-width: 1000px; margin: 0 auto; }
+        .bento-box { background: var(--card-bg); padding: 2rem; border-radius: 16px; border: 1px solid var(--border-color); text-align: center; transition: 0.3s; }
+        .bento-box:hover { transform: translateY(-5px); border-color: var(--primary-orange); }
+        .bento-num { font-size: 3rem; font-weight: 800; color: #fff; margin-bottom: 0.5rem; background: var(--brand-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    </style>
+</head>
+<body>
+
+    <button onclick="topFunction()" id="backToTop" title="Go to top"><i class="fas fa-arrow-up"></i></button>
+
+    <header>
+        <div class="logo">
+            <img src="images/red-bridge-logo.png" alt="Logo" style="height: 40px; width: auto; margin-right: 10px;">
+            RedBridge Consulting
+        </div>
+        <nav>
+            <div class="hamburger" onclick="toggleMenu()">☰</div>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="index.html">Home</a></li>
+                
+                <li>
+                    <a href="#" style="cursor: default;">Services <i class="fas fa-chevron-down"></i></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="career-launch.html">Career Launch Program</a></li>
+                        <li><a href="189-pathway.html">189 Skilled Pathway</a></li>
+                        <li><a href="190-pathway.html">190 State Nomination</a></li>
+                        <li><a href="491-pathway.html">491 Regional Pathway</a></li>
+                        <li><a href="employer-pathway.html">482/186 Employer Sponsored</a></li>
+                        <li><a href="emergency.html">Emergency Solutions</a></li>
+                    </ul>
+                </li>
+        
+                <li><a href="#">Success Cases</a></li>
+                <li><a href="#">Blog</a></li>
+                <li><a href="#">About Us</a></li>
+                <li><button class="btn-gradient" onclick="openModal()">Free Consultation</button></li>
+                
+                <li class="mobile-social-row">
+                    <div class="social-icon-box social-wechat" onclick="openQrModal('wechat')"><img src="images/wechat.svg" alt="WeChat"></div>
+                    <div class="social-icon-box social-tiktok" onclick="openQrModal('tiktok')"><img src="images/tiktok.svg" alt="TikTok"></div>
+                    <a href="https://www.xiaohongshu.com/user/profile/6363be4d000000001f017d2c" target="_blank" class="social-icon-box social-rednote"><img src="images/xiaohongshu.svg" alt="RedNote"></a>
+                    <a href="https://www.instagram.com/redbridgeconsulting/" target="_blank" class="social-icon-box social-insta"><i class="fab fa-instagram"></i></a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="floater-left">
+        <a href="tel:0399617301" class="floater-btn"><i class="fas fa-phone"></i><span>Call Us</span><span class="phone-num">03 9961 7301</span></a>
+        <div class="floater-btn" onclick="openModal()"><i class="fas fa-envelope"></i><span>Contact Us</span></div>
+    </div>
+    <div class="floater-right">
+        <div class="social-icon-box social-wechat" onclick="openQrModal('wechat')"><img src="images/wechat.svg" alt="WeChat"></div>
+        <div class="social-icon-box social-tiktok" onclick="openQrModal('tiktok')"><img src="images/tiktok.svg" alt="TikTok"></div>
+        <a href="#" class="social-icon-box social-rednote"><img src="images/xiaohongshu.svg" alt="RedNote"></a>
+        <a href="#" class="social-icon-box social-insta"><i class="fab fa-instagram"></i></a>
+    </div>
+
+    <div id="wechat-modal" class="qr-modal-overlay" onclick="closeQrModal('wechat')"><div class="qr-modal-content" onclick="event.stopPropagation()"><span class="close-qr" onclick="closeQrModal('wechat')">×</span><h3>Scan to Chat</h3><img src="images/wechat_qrcode.jpg" alt="WeChat"><p>WeChat ID:</p><div class="qr-id-text">gh_a712cd2cb325</div></div></div>
+    <div id="tiktok-modal" class="qr-modal-overlay" onclick="closeQrModal('tiktok')"><div class="qr-modal-content" onclick="event.stopPropagation()"><span class="close-qr" onclick="closeQrModal('tiktok')">×</span><h3>Follow us</h3><img src="images/tiktok_qrcode.jpg" alt="TikTok"><p>Scan to watch</p></div></div>
+
+    <section class="page-hero reveal-on-scroll">
+        <h1>Career Launch <br><span>Program</span></h1>
+        <p>Bridging the gap between university theory and the Australian job market. <br>Real commercial projects. Real experience. Real results.</p>
+        <button class="btn-gradient" onclick="openModal()">Check Eligibility</button>
+    </section>
+
+    <section class="section-padding reveal-on-scroll">
+        <div class="section-title">
+            <h2>Select Your Major</h2>
+            <p>See exactly what you will be working on.</p>
+        </div>
+
+        <div class="tabs-header">
+            <button class="tab-btn active" onclick="openTab('acc')">Accounting</button>
+            <button class="tab-btn" onclick="openTab('it')">IT & Data</button>
+            <button class="tab-btn" onclick="openTab('mkt')">Marketing</button>
+        </div>
+
+        <div id="acc" class="tab-content active">
+            <div class="role-card">
+                <div class="role-left">
+                    <h3>Assistant Accountant</h3>
+                    <p style="color:var(--text-gray); margin-bottom:1.5rem;">Work under a CPA mentor to handle end-of-year financials for real SME clients. Gain the local experience firms demand.</p>
+                    <div class="tools-container">
+                        <span class="tool-tag">Xero</span><span class="tool-tag">MYOB</span><span class="tool-tag">SAP</span><span class="tool-tag">Tax Returns</span>
+                    </div>
+                </div>
+                <div class="role-right">
+                    <ul class="card-features">
+                        <li><strong>Outcome:</strong> CPA Signed Logbook</li>
+                        <li><strong>Role:</strong> Assistant Accountant</li>
+                        <li><strong>Project:</strong> SME Tax Preparation</li>
+                        <li><strong>Duration:</strong> 3 Months</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div id="it" class="tab-content">
+            <div class="role-card">
+                <div class="role-left">
+                    <h3>Full Stack Developer</h3>
+                    <p style="color:var(--text-gray); margin-bottom:1.5rem;">Join an Agile team to build and deploy a scalable web application. Move beyond tutorials to production-grade code.</p>
+                    <div class="tools-container">
+                        <span class="tool-tag">React.js</span><span class="tool-tag">Node.js</span><span class="tool-tag">AWS</span><span class="tool-tag">Python</span>
+                    </div>
+                </div>
+                <div class="role-right">
+                    <ul class="card-features">
+                        <li><strong>Outcome:</strong> GitHub Portfolio</li>
+                        <li><strong>Role:</strong> Junior Developer</li>
+                        <li><strong>Project:</strong> E-commerce Platform</li>
+                        <li><strong>Duration:</strong> 3 Months</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div id="mkt" class="tab-content">
+            <div class="role-card">
+                <div class="role-left">
+                    <h3>Digital Marketer</h3>
+                    <p style="color:var(--text-gray); margin-bottom:1.5rem;">Manage real ad spend and content strategy. Analyze data to drive ROI for local businesses.</p>
+                    <div class="tools-container">
+                        <span class="tool-tag">Google Ads</span><span class="tool-tag">Meta Business</span><span class="tool-tag">SEO</span><span class="tool-tag">Canva</span>
+                    </div>
+                </div>
+                <div class="role-right">
+                    <ul class="card-features">
+                        <li><strong>Outcome:</strong> Portfolio of Live Campaigns</li>
+                        <li><strong>Role:</strong> Marketing Coordinator</li>
+                        <li><strong>Project:</strong> Brand Launch Strategy</li>
+                        <li><strong>Duration:</strong> 3 Months</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-padding reveal-on-scroll" style="background-color: #0f0f0f;">
+        <div class="section-title">
+            <h2>Your Journey to Employment</h2>
+            <p>A structured roadmap designed to get you hired.</p>
+        </div>
+        
+        <div class="timeline-section">
+            <div class="timeline-line"></div>
+            
+            <div class="timeline-row">
+                <div class="timeline-dot">01</div>
+                <div class="timeline-text">
+                    <span class="timeline-date">Month 1</span>
+                    <h3>Gap Analysis & Training</h3>
+                    <p>We review your university transcript and skills. Then, we put you through an intensive bootcamp to master the specific software tools used in Australian workplaces.</p>
+                </div>
+            </div>
+
+            <div class="timeline-row">
+                <div class="timeline-dot">02</div>
+                <div class="timeline-text">
+                    <span class="timeline-date">Month 2-4</span>
+                    <h3>Commercial Project</h3>
+                    <p>The core of the program. You join a project team to deliver real work for a client. You will clock 400+ hours of verified work experience.</p>
+                </div>
+            </div>
+
+            <div class="timeline-row">
+                <div class="timeline-dot">03</div>
+                <div class="timeline-text">
+                    <span class="timeline-date">Month 5</span>
+                    <h3>Portfolio & Branding</h3>
+                    <p>We rebuild your CV to highlight your new experience. We construct your professional portfolio and optimize your LinkedIn profile.</p>
+                </div>
+            </div>
+
+            <div class="timeline-row">
+                <div class="timeline-dot">04</div>
+                <div class="timeline-text">
+                    <span class="timeline-date">Month 6</span>
+                    <h3>Placement & Reference</h3>
+                    <p>You receive a professional reference from your project lead. We connect you with our hiring network and support you until you sign a contract.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-padding reveal-on-scroll">
+        <div class="section-title">
+            <h2>Why Choose RedBridge?</h2>
+            <p>Data-backed results you can trust.</p>
+        </div>
+        <div class="bento-grid">
+            <div class="bento-box">
+                <div class="bento-num">200+</div>
+                <p>Graduates Hired</p>
+            </div>
+            <div class="bento-box">
+                <div class="bento-num">100%</div>
+                <p>Skill Assessment Guarantee</p>
+            </div>
+            <div class="bento-box">
+                <div class="bento-num">400h</div>
+                <p>Loggable Experience</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-padding reveal-on-scroll">
+        <div class="contact-box-wrapper">
+            <div class="contact-redesign">
+                <div class="cta-pulse-container">
+                    <h2 style="margin-bottom:1rem;">Ready to launch your career?</h2>
+                    <p style="color:#aaa; margin-bottom:2rem;">Slots for the next intake are filling up.</p>
+                    <button class="btn-pulse" onclick="openModal()">Book Free Consultation</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-center">
+            <div class="footer-logo">
+                <img src="images/red-bridge-logo.png" alt="RedBridge Consulting Logo">
+                <div class="logo-text"><span>RedBridge</span><span>Consulting</span></div>
+            </div>
+            <h4 class="footer-slogan">Bridging Dreams and Opportunities</h4>
+            <p class="footer-desc">Dedicated to providing professional Australian employment training and life guidance services.</p>
+        </div>
+        <div class="footer-bottom">
+            <div style="display: flex; justify-content: center; gap: 1rem;">
+                <div class="footer-legal-links"><a href="#">Privacy Policy</a><a href="#">Terms of Service</a></div>
+            </div>
+            <div style="text-align: center; margin-top: 1rem; color: #444;">© 2026 RedBridge Consulting. Designed by Vanessa https://www.linkedin.com/in/vanessachs/. All rights reserved.</div>
+        </div>
+    </footer>
+
+    <div class="modal-overlay" id="consultationModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-header-left">
+                    <h3 id="step-title">Step 1: Contact Info</h3>
+                    <div style="display:flex; align-items:center; gap:15px;">
+                        <div class="progress-container" style="width: 150px;">
+                            <div class="progress-bar" id="progressBar"></div>
+                        </div>
+                        <a onclick="saveProgress()" class="save-link">Save & Continue Later</a>
+                    </div>
+                </div>
+                <span class="close-modal" onclick="closeModal()">×</span>
+            </div>
+
+            <form id="multiStepForm" onsubmit="event.preventDefault(); submitForm();">
+                <div class="form-step active">
+                    <div class="input-group-row">
+                        <div class="form-group"><label>First Name*</label><input type="text" id="fname" required></div>
+                        <div class="form-group"><label>Last Name*</label><input type="text" id="lname" required></div>
+                    </div>
+                    <div class="form-group"><label>Email*</label><div class="input-with-btn"><input type="email" id="email" required><button type="button" class="btn-outline" onclick="verifyField('email')">Verify</button></div><div id="email-otp" class="hidden otp-box"><input type="text" placeholder="Enter Email Verification Code"></div></div>
+                    <div class="form-group"><label>Mobile Number*</label><div class="input-with-btn"><input type="tel" id="mobile" required><button type="button" class="btn-outline" onclick="verifyField('mobile')">Verify</button></div><div id="mobile-otp" class="hidden otp-box"><input type="text" placeholder="Enter SMS Code"></div></div>
+                    <div class="form-group"><label>Preferred Contact*</label><select id="prefContact" onchange="handleContactMethod()" required><option value="">Please Select</option><option value="Mobile">Mobile</option><option value="Email">Email</option><option value="WeChat">WeChat</option><option value="WhatsApp">WhatsApp</option></select></div>
+                    <div class="form-group hidden" id="field-whatsapp"><label>WhatsApp Number*</label><input type="text" id="whatsappVal"></div>
+                    <div class="form-group hidden" id="field-wechat"><label>WeChat ID*</label><input type="text" id="wechatVal"></div>
+                    <div class="form-group"><label>How Did You Find Us?*</label><select id="source" required><option value="">Select</option><option>Instagram Search</option><option>Instagram Story Ads</option><option>Instagram Feed Ads</option><option>Organic Instagram Post</option><option>Web Search</option><option>Word of Mouth</option><option>Referral</option></select></div>
+                    <div class="form-group"><label>Budget Available for Our Service*</label><select id="budget" required><option value="">Select</option><option>$50K-$100K</option><option>$100K-$150K</option><option>$150K-$200K</option><option>$200K-$250K</option></select></div>
+                </div>
+                <div class="form-step">
+                    <div class="input-group-row"><div class="form-group"><label>Gender*</label><select id="gender" required><option value="">Select</option><option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option></select></div><div class="form-group"><label>Nationality*</label><select id="nationality" required></select></div></div>
+                    <div class="form-group"><label>Country of Residency*</label><select id="countryResidency" onchange="handleLocationLogic()" required></select></div>
+                    <div class="form-group hidden" id="field-applied-prev"><label>Applied for Australian Visa Previously?*</label><select id="appliedPrev" onchange="handleVisaHistoryLogic()"><option value="">Select</option><option value="Yes">Yes</option><option value="No">No</option></select></div>
+                    <div class="form-group hidden" id="field-location"><label>Location in Australia*</label><select id="locationSelect" onchange="handleLocationLogic()"><option value="">Select</option><option value="Melbourne">Melbourne</option><option value="Sydney">Sydney</option><option value="Brisbane">Brisbane</option><option value="Perth">Perth</option><option value="Adelaide">Adelaide</option><option value="Canberra">Canberra</option><option value="Gold Coast">Gold Coast</option><option value="Other">Other</option></select></div>
+                    <div class="form-group hidden" id="field-relocate"><label>Willing to Relocate to Melbourne?*</label><select id="relocateVal"><option>Yes</option><option>No</option></select></div>
+                </div>
+                <div class="form-step">
+                    <div class="form-group" id="field-visa-cancel"><label>Previous Visa Cancelled?*</label><select id="visaCancel" required><option value="">Select</option><option value="Yes">Yes</option><option value="No">No</option></select></div>
+                    <div class="form-group"><label>Date of Birth*</label><input type="date" id="dob" required></div>
+                    <div class="input-group-row"><div class="form-group" id="field-visa-prev"><label>Previous Visa*</label><select id="prevVisa" required></select></div><div class="form-group" id="field-visa-curr"><label>Current Visa*</label><select id="currVisa" required onchange="handleVisaExpiryLogic()"></select></div></div>
+                    <div class="form-group" id="field-visa-expiry"><label>Visa Expiry Date*</label><input type="date" id="visaExpiry" required></div>
+                    <div class="form-group"><label>Consultation Type*</label><select id="consultType" required><option>Career Launch</option><option>189 Skilled Independent</option><option>190 State Nominated</option><option>482/186 Employer Nomination</option><option>491 Regional Sponsored</option><option>Emergency</option><option>Other</option></select></div>
+                    <div class="form-group"><label>Target Occupation Group*</label><select id="occGroup" onchange="handleOccupationLogic()" required><option value="">Select Group</option><option value="ICT">ICT</option><option value="Health">Health & Medical</option><option value="Eng">Engineering & Construction</option><option value="Bus">Business & Finance</option><option value="Edu">Education & Training</option><option value="Mkt">Marketing</option><option value="Other">Other</option></select></div>
+                    <div class="form-group hidden" id="list-ict"><label>ICT List</label><select id="sel-ict"></select></div>
+                    <div class="form-group hidden" id="list-health"><label>Health List</label><select id="sel-health"></select></div>
+                    <div class="form-group hidden" id="list-eng"><label>Engineering List</label><select id="sel-eng"></select></div>
+                    <div class="form-group hidden" id="list-bus"><label>Business List</label><select id="sel-bus"></select></div>
+                    <div class="form-group hidden" id="list-edu"><label>Education List</label><select id="sel-edu"></select></div>
+                    <div class="form-group hidden" id="list-mkt"><label>Marketing List</label><select id="sel-mkt"></select></div>
+                </div>
+                <div class="form-step">
+                    <div style="text-align: center; padding: 2rem 0;"><h4 style="color: var(--primary-orange);">Almost there!</h4><p>Have another minute? Just a few more easy questions to personalize your discovery call.</p><div class="form-group" style="margin-top:20px;"><label>Continue to extra questions?</label><select id="continueExtra" onchange="handleSkipLogic()"><option value="Yes">Yes</option><option value="No">No (Skip)</option></select></div></div>
+                </div>
+                <div class="form-step">
+                    <div class="form-group"><label>Highest Level of Education*</label><select id="eduLevel" onchange="handleEduLogic()" required><option value="">Select</option><option value="High School">High School</option><option value="Certificate">Certificate I-IV</option><option value="Diploma">Diploma</option><option value="Bachelor's">Bachelor's</option><option value="Master's">Master's</option><option value="Doctorate">Doctorate</option></select></div>
+                    <div class="form-group"><label>Year of Graduation*</label><input type="number" placeholder="YYYY" id="gradYear" required class="positive-int"></div>
+                    <div class="form-group"><label>Country of Graduation*</label><select id="countryGrad" required></select></div>
+                    <div class="form-group hidden" id="field-bach"><label>Bachelor Major*</label><input type="text" id="bachMajor"></div>
+                    <div class="form-group hidden" id="field-mast"><label>Master Major*</label><input type="text" id="mastMajor"></div>
+                    <div class="form-group"><label>Relevant Work Experience in Australia (Years)*</label><select id="workExpYears" onchange="handleWorkExpLogic()" required><option value="">Select</option><option value="Less than 1 year">Less than 1 year</option><option value="At least 1 but less than 3 years">At least 1 but less than 3 years</option><option value="At least 3 but less than 5 years">At least 3 but less than 5 years</option><option value="At least 5 but less than 8 years">At least 5 but less than 8 years</option><option value="At least 8 years">At least 8 years</option></select></div>
+                    <div id="job-relevant" class="hidden"><div class="form-group"><label>Relevant Job Title*</label><input type="text" id="relJobTitle"></div><div class="form-group"><label>Relevant Job Duties*</label><textarea rows="3" id="relJobDuties"></textarea></div></div>
+                    <div id="job-latest" class="hidden"><div class="form-group"><label>Latest Job Title*</label><input type="text" id="latJobTitle"></div><div class="form-group"><label>Latest Job Duties*</label><textarea rows="3" id="latJobDuties"></textarea></div></div>
+                    <div class="form-group"><label>Resume/CV Upload</label><input type="file" accept=".pdf,.doc,.docx" id="resumeUpload"></div>
+                </div>
+                <div class="form-step">
+                    <div class="form-group"><label>Latest English Test*</label><select id="engTest" onchange="handleEngLogic()" required></select></div>
+                    <div id="engScores" class="hidden"><div class="form-group"><label>Test Date*</label><input type="date" id="testDate"></div><div class="input-group-row"><div class="form-group"><label>Writing</label><input type="number" id="engWriting" class="positive-int" min="0"></div><div class="form-group"><label>Listening</label><input type="number" id="engListening" class="positive-int" min="0"></div></div><div class="input-group-row"><div class="form-group"><label>Speaking</label><input type="number" id="engSpeaking" class="positive-int" min="0"></div><div class="form-group"><label>Reading</label><input type="number" id="engReading" class="positive-int" min="0"></div></div><div class="form-group"><label>Overall Score</label><input type="number" id="engOverall" class="positive-int" min="0"></div></div>
+                </div>
+                <div class="form-step"><div style="text-align: center; margin-bottom: 2rem;"><h4>Review & Submit</h4><p style="font-size:0.9rem;">Please review your details below.</p></div><div id="summary-content"></div></div>
+                <div class="modal-footer"><button type="button" class="btn-outline" id="prevBtn" onclick="nextPrev(-1)">Previous</button><button type="button" class="btn-gradient" id="nextBtn" onclick="nextPrev(1)">Next</button></div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openTab(id) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            event.target.classList.add('active');
+        }
+    </script>
+
+    <script src="script.js"></script>
+</body>
+</html>
