@@ -1,7 +1,7 @@
-/* --- REDBRIDGE GLOBAL SCRIPTS (Version 43 - Save & Resume Enabled) --- */
+/* --- REDBRIDGE GLOBAL SCRIPTS (Version 44 - UI Feedback & Cache Busting) --- */
 
 // --- GLOBAL VARIABLES ---
-let isEmailVerified = false; // Tracks if the user has confirmed their OTP
+let isEmailVerified = false; 
 
 // --- DATA SETS ---
 const countriesList = [
@@ -152,7 +152,9 @@ async function checkResumeLink() {
 }
 
 async function saveProgress() { 
-    console.log("Save button clicked!"); // This helps us debug
+    // Grab the button and update text instantly to show it's working
+    const btn = document.getElementById('saveBtn');
+    const originalText = btn ? btn.innerText : "Save & Continue Later";
     
     const emailEl = document.getElementById('email');
     if(!emailEl || !emailEl.value) {
@@ -162,7 +164,12 @@ async function saveProgress() {
     } 
     const email = emailEl.value;
 
-    // 1. Gather data safely (without relying on a specific Form ID)
+    if (btn) {
+        btn.innerText = "Saving (Please wait)...";
+        btn.disabled = true;
+    }
+
+    // 1. Gather data safely 
     const formData = {};
     const inputs = document.querySelectorAll('input, select, textarea');
     inputs.forEach(el => {
@@ -171,11 +178,9 @@ async function saveProgress() {
         }
     });
     formData['currentTab'] = currentTab;
-    console.log("Data ready to save:", formData);
 
     // 2. Send to Render
     try {
-        // Double check this URL is exactly correct
         const response = await fetch('https://redbridge.onrender.com/api/save-progress', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -193,13 +198,17 @@ async function saveProgress() {
         alert("There was an issue saving to the cloud. We have saved your progress locally on this browser instead.");
         saveLocalData(); 
         closeModal();
-    } 
+    } finally {
+        if (btn) {
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }
+    }
 }
 
 // --- LOCAL FALLBACK FUNCTIONS ---
 function saveLocalData() {
     const formData = {};
-    // Grab all inputs directly instead of relying on a specific Form ID
     const inputs = document.querySelectorAll('input, select, textarea');
     inputs.forEach(el => {
         if (el.id && el.type !== 'file' && el.type !== 'submit') { 
@@ -416,8 +425,6 @@ async function submitForm() {
             alert("Thank you! Your professional profile has been submitted and assigned to a RedBridge specialist.");
             localStorage.removeItem('rb_consultation_data');
             closeModal();
-            // Optional: Redirect to a custom thank you page
-            // window.location.href = "thank-you.html";
         } else {
             const result = await response.json();
             throw new Error(result.error || 'Server error');
