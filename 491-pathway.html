@@ -255,6 +255,7 @@
 
     <div class="modal-overlay" id="consultationModal">
         <div class="modal-content">
+            
             <div class="modal-header">
                 <div class="modal-header-left">
                     <h3 id="step-title">Step 1: Contact Info</h3>
@@ -262,39 +263,73 @@
                         <div class="progress-container" style="width: 150px;">
                             <div class="progress-bar" id="progressBar"></div>
                         </div>
-                        <a onclick="saveProgress()" class="save-link">Save & Continue Later</a>
+                        <button type="button" id="saveBtn" class="btn-outline" style="padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="saveProgress()">Save & Continue Later</button>
                     </div>
                 </div>
                 <span class="close-modal" onclick="closeModal()">×</span>
             </div>
 
             <form id="multiStepForm" onsubmit="event.preventDefault(); submitForm();">
+                
                 <div class="form-step active">
                     <div class="input-group-row">
                         <div class="form-group"><label>First Name*</label><input type="text" id="fname" required></div>
                         <div class="form-group"><label>Last Name*</label><input type="text" id="lname" required></div>
                     </div>
-                    <div class="form-group"><label>Email*</label><div class="input-with-btn"><input type="email" id="email" required><button type="button" class="btn-outline" onclick="verifyField('email')">Verify</button></div><div id="email-otp" class="hidden otp-box"><input type="text" placeholder="Enter Email Verification Code"></div></div>
-                    <div class="form-group"><label>Mobile Number*</label><div class="input-with-btn"><input type="tel" id="mobile" required><button type="button" class="btn-outline" onclick="verifyField('mobile')">Verify</button></div><div id="mobile-otp" class="hidden otp-box"><input type="text" placeholder="Enter SMS Code"></div></div>
+                    
+                    <div class="form-group">
+                        <label>Email*</label>
+                        <div class="input-with-btn">
+                            <input type="email" id="email" required placeholder="name@example.com">
+                            <button type="button" class="btn-outline" onclick="verifyField('email')">Verify</button>
+                        </div>
+                        <div id="email-otp" class="hidden otp-box">
+                            <div class="input-with-btn">
+                                <input type="text" id="otpInput" placeholder="Enter 6-digit code">
+                                <button type="button" class="btn-gradient" onclick="validateOtp()">Confirm</button>
+                            </div>
+                            <span id="otp-message" style="font-size: 0.8rem; display: block; margin-top: 5px;"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Mobile Number*</label>
+                        <input type="tel" id="mobile" required placeholder="0400 000 000">
+                    </div>
+
                     <div class="form-group"><label>Preferred Contact*</label><select id="prefContact" onchange="handleContactMethod()" required><option value="">Please Select</option><option value="Mobile">Mobile</option><option value="Email">Email</option><option value="WeChat">WeChat</option><option value="WhatsApp">WhatsApp</option></select></div>
                     <div class="form-group hidden" id="field-whatsapp"><label>WhatsApp Number*</label><input type="text" id="whatsappVal"></div>
                     <div class="form-group hidden" id="field-wechat"><label>WeChat ID*</label><input type="text" id="wechatVal"></div>
+                    
                     <div class="form-group"><label>How Did You Find Us?*</label><select id="source" required><option value="">Select</option><option>Instagram Search</option><option>Instagram Story Ads</option><option>Instagram Feed Ads</option><option>Organic Instagram Post</option><option>Web Search</option><option>Word of Mouth</option><option>Referral</option></select></div>
                     <div class="form-group"><label>Budget Available for Our Service*</label><select id="budget" required><option value="">Select</option><option>$50K-$100K</option><option>$100K-$150K</option><option>$150K-$200K</option><option>$200K-$250K</option></select></div>
                 </div>
+                
                 <div class="form-step">
                     <div class="input-group-row"><div class="form-group"><label>Gender*</label><select id="gender" required><option value="">Select</option><option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option></select></div><div class="form-group"><label>Nationality*</label><select id="nationality" required></select></div></div>
+                    
                     <div class="form-group"><label>Country of Residency*</label><select id="countryResidency" onchange="handleLocationLogic()" required></select></div>
                     <div class="form-group hidden" id="field-applied-prev"><label>Applied for Australian Visa Previously?*</label><select id="appliedPrev" onchange="handleVisaHistoryLogic()"><option value="">Select</option><option value="Yes">Yes</option><option value="No">No</option></select></div>
                     <div class="form-group hidden" id="field-location"><label>Location in Australia*</label><select id="locationSelect" onchange="handleLocationLogic()"><option value="">Select</option><option value="Melbourne">Melbourne</option><option value="Sydney">Sydney</option><option value="Brisbane">Brisbane</option><option value="Perth">Perth</option><option value="Adelaide">Adelaide</option><option value="Canberra">Canberra</option><option value="Gold Coast">Gold Coast</option><option value="Other">Other</option></select></div>
-                    <div class="form-group hidden" id="field-relocate"><label>Willing to Relocate to Melbourne?*</label><select id="relocateVal"><option>Yes</option><option>No</option></select></div>
+                    
+                    <div class="form-group hidden" id="field-relocate">
+                        <label>Willing to Relocate to Melbourne?*</label>
+                        <select id="relocateVal" required> 
+                            <option value="">Select</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
                 </div>
+                
                 <div class="form-step">
                     <div class="form-group" id="field-visa-cancel"><label>Previous Visa Cancelled?*</label><select id="visaCancel" required><option value="">Select</option><option value="Yes">Yes</option><option value="No">No</option></select></div>
                     <div class="form-group"><label>Date of Birth*</label><input type="date" id="dob" required></div>
                     <div class="input-group-row"><div class="form-group" id="field-visa-prev"><label>Previous Visa*</label><select id="prevVisa" required></select></div><div class="form-group" id="field-visa-curr"><label>Current Visa*</label><select id="currVisa" required onchange="handleVisaExpiryLogic()"></select></div></div>
                     <div class="form-group" id="field-visa-expiry"><label>Visa Expiry Date*</label><input type="date" id="visaExpiry" required></div>
+                    
                     <div class="form-group"><label>Consultation Type*</label><select id="consultType" required><option>Career Launch</option><option>189 Skilled Independent</option><option>190 State Nominated</option><option>482/186 Employer Nomination</option><option>491 Regional Sponsored</option><option>Emergency</option><option>Other</option></select></div>
+                    
                     <div class="form-group"><label>Target Occupation Group*</label><select id="occGroup" onchange="handleOccupationLogic()" required><option value="">Select Group</option><option value="ICT">ICT</option><option value="Health">Health & Medical</option><option value="Eng">Engineering & Construction</option><option value="Bus">Business & Finance</option><option value="Edu">Education & Training</option><option value="Mkt">Marketing</option><option value="Other">Other</option></select></div>
                     <div class="form-group hidden" id="list-ict"><label>ICT List</label><select id="sel-ict"></select></div>
                     <div class="form-group hidden" id="list-health"><label>Health List</label><select id="sel-health"></select></div>
@@ -303,25 +338,64 @@
                     <div class="form-group hidden" id="list-edu"><label>Education List</label><select id="sel-edu"></select></div>
                     <div class="form-group hidden" id="list-mkt"><label>Marketing List</label><select id="sel-mkt"></select></div>
                 </div>
+                
                 <div class="form-step">
                     <div style="text-align: center; padding: 2rem 0;"><h4 style="color: var(--primary-orange);">Almost there!</h4><p>Have another minute? Just a few more easy questions to personalize your discovery call.</p><div class="form-group" style="margin-top:20px;"><label>Continue to extra questions?</label><select id="continueExtra" onchange="handleSkipLogic()"><option value="Yes">Yes</option><option value="No">No (Skip)</option></select></div></div>
                 </div>
+                
                 <div class="form-step">
                     <div class="form-group"><label>Highest Level of Education*</label><select id="eduLevel" onchange="handleEduLogic()" required><option value="">Select</option><option value="High School">High School</option><option value="Certificate">Certificate I-IV</option><option value="Diploma">Diploma</option><option value="Bachelor's">Bachelor's</option><option value="Master's">Master's</option><option value="Doctorate">Doctorate</option></select></div>
                     <div class="form-group"><label>Year of Graduation*</label><input type="number" placeholder="YYYY" id="gradYear" required class="positive-int"></div>
                     <div class="form-group"><label>Country of Graduation*</label><select id="countryGrad" required></select></div>
                     <div class="form-group hidden" id="field-bach"><label>Bachelor Major*</label><input type="text" id="bachMajor"></div>
                     <div class="form-group hidden" id="field-mast"><label>Master Major*</label><input type="text" id="mastMajor"></div>
-                    <div class="form-group"><label>Relevant Work Experience in Australia (Years)*</label><select id="workExpYears" onchange="handleWorkExpLogic()" required><option value="">Select</option><option value="Less than 1 year">Less than 1 year</option><option value="At least 1 but less than 3 years">At least 1 but less than 3 years</option><option value="At least 3 but less than 5 years">At least 3 but less than 5 years</option><option value="At least 5 but less than 8 years">At least 5 but less than 8 years</option><option value="At least 8 years">At least 8 years</option></select></div>
-                    <div id="job-relevant" class="hidden"><div class="form-group"><label>Relevant Job Title*</label><input type="text" id="relJobTitle"></div><div class="form-group"><label>Relevant Job Duties*</label><textarea rows="3" id="relJobDuties"></textarea></div></div>
-                    <div id="job-latest" class="hidden"><div class="form-group"><label>Latest Job Title*</label><input type="text" id="latJobTitle"></div><div class="form-group"><label>Latest Job Duties*</label><textarea rows="3" id="latJobDuties"></textarea></div></div>
+                    
+                    <div class="form-group">
+                        <label>Relevant Work Experience in Australia (Years)*</label>
+                        <select id="workExpYears" onchange="handleWorkExpLogic()" required>
+                            <option value="">Select</option>
+                            <option value="Less than 1 year">Less than 1 year</option>
+                            <option value="At least 1 but less than 3 years">At least 1 but less than 3 years</option>
+                            <option value="At least 3 but less than 5 years">At least 3 but less than 5 years</option>
+                            <option value="At least 5 but less than 8 years">At least 5 but less than 8 years</option>
+                            <option value="At least 8 years">At least 8 years</option>
+                        </select>
+                    </div>
+                    
+                    <div id="job-relevant" class="hidden">
+                        <div class="form-group"><label>Relevant Job Title*</label><input type="text" id="relJobTitle"></div>
+                        <div class="form-group"><label>Relevant Job Duties*</label><textarea rows="3" id="relJobDuties"></textarea></div>
+                    </div>
+                    <div id="job-latest" class="hidden">
+                        <div class="form-group"><label>Latest Job Title*</label><input type="text" id="latJobTitle"></div>
+                        <div class="form-group"><label>Latest Job Duties*</label><textarea rows="3" id="latJobDuties"></textarea></div>
+                    </div>
+
                     <div class="form-group"><label>Resume/CV Upload</label><input type="file" accept=".pdf,.doc,.docx" id="resumeUpload"></div>
                 </div>
+                
                 <div class="form-step">
                     <div class="form-group"><label>Latest English Test*</label><select id="engTest" onchange="handleEngLogic()" required></select></div>
-                    <div id="engScores" class="hidden"><div class="form-group"><label>Test Date*</label><input type="date" id="testDate"></div><div class="input-group-row"><div class="form-group"><label>Writing</label><input type="number" id="engWriting" class="positive-int" min="0"></div><div class="form-group"><label>Listening</label><input type="number" id="engListening" class="positive-int" min="0"></div></div><div class="input-group-row"><div class="form-group"><label>Speaking</label><input type="number" id="engSpeaking" class="positive-int" min="0"></div><div class="form-group"><label>Reading</label><input type="number" id="engReading" class="positive-int" min="0"></div></div><div class="form-group"><label>Overall Score</label><input type="number" id="engOverall" class="positive-int" min="0"></div></div>
+                    <div id="engScores" class="hidden">
+                        <div class="form-group"><label>Test Date*</label><input type="date" id="testDate"></div>
+                        
+                        <div class="input-group-row">
+                            <div class="form-group"><label>Writing</label><input type="number" id="engWriting" class="positive-int" min="0"></div>
+                            <div class="form-group"><label>Listening</label><input type="number" id="engListening" class="positive-int" min="0"></div>
+                        </div>
+                        <div class="input-group-row">
+                            <div class="form-group"><label>Speaking</label><input type="number" id="engSpeaking" class="positive-int" min="0"></div>
+                            <div class="form-group"><label>Reading</label><input type="number" id="engReading" class="positive-int" min="0"></div>
+                        </div>
+                        <div class="form-group"><label>Overall Score</label><input type="number" id="engOverall" class="positive-int" min="0"></div>
+                    </div>
                 </div>
-                <div class="form-step"><div style="text-align: center; margin-bottom: 2rem;"><h4>Review & Submit</h4><p style="font-size:0.9rem;">Please review your details below.</p></div><div id="summary-content"></div></div>
+                
+                <div class="form-step">
+                    <div style="text-align: center; margin-bottom: 2rem;"><h4>Review & Submit</h4><p style="font-size:0.9rem;">Please review your details below.</p></div>
+                    <div id="summary-content"></div>
+                </div>
+
                 <div class="modal-footer"><button type="button" class="btn-outline" id="prevBtn" onclick="nextPrev(-1)">Previous</button><button type="button" class="btn-gradient" id="nextBtn" onclick="nextPrev(1)">Next</button></div>
             </form>
         </div>
@@ -335,6 +409,6 @@
             event.target.classList.add('active');
         }
     </script>
-    <script src="script.js"></script>
+    <script src="script.js?v=45"></script>
 </body>
 </html>
