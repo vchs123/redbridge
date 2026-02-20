@@ -12,7 +12,21 @@ app.use(cors());
 // Configure Multer to hold files in memory temporarily before sending to Supabase (Max 5MB)
 const upload = multer({ 
     storage: multer.memoryStorage(),
-    limits: { fileSize: 5 * 1024 * 1024 } 
+    limits: { fileSize: 2 * 1024 * 1024 }, // 2MB Limit
+    fileFilter: (req, file, cb) => {
+        // Allowed file extensions
+        const allowedTypes = /pdf|doc|docx/;
+        
+        // Check the extension and the mime type
+        const extname = allowedTypes.test(file.originalname.toLowerCase());
+        const mimetype = allowedTypes.test(file.mimetype);
+
+        if (extname && mimetype) {
+            return cb(null, true);
+        } else {
+            cb(new Error('Only PDF, DOC and DOCX files are allowed!'));
+        }
+    }
 });
 
 // Initialize Clients
