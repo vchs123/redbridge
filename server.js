@@ -102,7 +102,7 @@ app.post('/api/save-progress', async (req, res) => {
             from: 'RedBridge <onboarding@resend.dev>',
             to: email,
             subject: 'Resume your RedBridge Application',
-            html: `<p>You saved your progress. Click below to continue:</p>
+            html: `<p>Thank you for starting your inquiry application with redBridge Consulting. Your progress is saved. Click below to continue:</p>
                    <a href="${resumeLink}">${resumeLink}</a>`
         });
 
@@ -126,6 +126,64 @@ app.get('/api/resume/:id', async (req, res) => {
         res.status(200).json(data.form_data);
     } catch (err) {
         res.status(500).json({ error: "Server error" });
+    }
+});
+
+// --- ROUTE 6: EMPLOYER INQUIRY (NEW) ---
+app.post('/api/employers', async (req, res) => {
+    const data = req.body;
+    
+    try {
+        // 1. Save to Supabase 'employers' table
+        const { error } = await supabase
+            .from('employers')
+            .insert([{
+                business_name: data.businessName,
+                abn: data.abn,
+                contact_name: data.contactName,
+                contact_title: data.contactTitle,
+                email: data.email,
+                phone: data.phone,
+                business_address: data.businessAddress,
+                is_approved_sponsor: data.isApprovedSponsor,
+                sponsored_before: data.sponsoredBefore,
+                is_accredited: data.isAccredited,
+                lawful_proof: data.lawfulProof,
+                financial_capacity: data.financialCapacity,
+                worker_ratio: data.workerRatio,
+                on_skilled_list: data.onSkilledList,
+                willing_to_lmt: data.willingToLMT,
+                provide_jd: data.provideJD,
+                cover_fees: data.coverFees,
+                aware_of_saf: data.awareOfSAF,
+                cover_relocation: data.coverRelocation,
+                provide_contract: data.provideContract,
+                meet_compliance: data.meetCompliance,
+                pathway_to_pr: data.pathwayToPR
+            }]);
+
+        if (error) throw error;
+
+        // 2. Email Notification to RedBridge Team
+        await resend.emails.send({
+            from: 'RedBridge System <onboarding@resend.dev>', // Change to your verified domain later
+            to: 'vanessa@red-bridge.com.au', // Change this to whoever handles B2B leads
+            subject: '🚨 New Employer Sponsorship Inquiry: ' + data.businessName,
+            html: `
+                <h3>New Employer Inquiry</h3>
+                <p><strong>Business:</strong> ${data.businessName} (ABN: ${data.abn})</p>
+                <p><strong>Contact:</strong> ${data.contactName} (${data.contactTitle})</p>
+                <p><strong>Email:</strong> ${data.email} | <strong>Phone:</strong> ${data.phone}</p>
+                <p><strong>Address:</strong> ${data.businessAddress}</p>
+                <br>
+                <p>Please log in to Supabase to view their full compliance and sponsorship history.</p>
+            `
+        });
+
+        res.status(200).json({ success: true });
+    } catch (err) {
+        console.error('Employer Submit Error:', err);
+        res.status(500).json({ error: "Failed to submit employer inquiry." });
     }
 });
 
