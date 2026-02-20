@@ -111,7 +111,7 @@ async function checkResumeLink() {
 
     if (resumeId) {
         try {
-            const response = await fetch(`https://redbridge-api.onrender.com/api/resume/${resumeId}`);
+            const response = await fetch(`https://redbridge.onrender.com/api/resume/${resumeId}`);
             if (!response.ok) throw new Error("Link expired or invalid");
             
             const savedData = await response.json();
@@ -177,7 +177,7 @@ async function saveProgress() {
     formData['currentTab'] = currentTab;
 
     try {
-        const response = await fetch('https://redbridge-api.onrender.com/api/save-progress', {
+        const response = await fetch('https://redbridge.onrender.com/api/save-progress', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: email, data: formData })
@@ -322,7 +322,7 @@ async function verifyField(type) {
     btn.disabled = true;
 
     try {
-        const response = await fetch('https://redbridge-api.onrender.com/api/send-email-otp', {
+        const response = await fetch('https://redbridge.onrender.com/api/send-email-otp', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: emailValue })
@@ -352,7 +352,7 @@ async function validateOtp() {
     if (!code) { alert("Please enter the code sent to your email."); return; }
 
     try {
-        const response = await fetch('https://redbridge-api.onrender.com/api/verify-email-otp', {
+        const response = await fetch('https://redbridge.onrender.com/api/verify-email-otp', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, code })
@@ -408,7 +408,7 @@ async function submitForm() {
     };
 
     try {
-        const response = await fetch('https://redbridge-api.onrender.com/api/leads', {
+        const response = await fetch('https://redbridge.onrender.com/api/leads', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(formData),
