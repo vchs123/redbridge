@@ -152,31 +152,30 @@ async function checkResumeLink() {
 }
 
 async function saveProgress() { 
-    const email = document.getElementById('email').value; 
-    if(!email) {
+    console.log("Save button clicked!"); // This helps us debug
+    
+    const emailEl = document.getElementById('email');
+    if(!emailEl || !emailEl.value) {
         alert("Please enter your email in Step 1 so we can save your progress securely.");
         showTab(0);
-        document.getElementById('email').focus();
         return;
     } 
+    const email = emailEl.value;
 
-    const btn = document.querySelector('button[onclick="saveProgress()"]');
-    const originalText = btn.innerHTML;
-    btn.innerHTML = "Saving...";
-    btn.disabled = true;
-
-    // Gather data
+    // 1. Gather data safely (without relying on a specific Form ID)
     const formData = {};
-    const inputs = document.getElementById('multiStepForm').elements;
-    for (let i = 0; i < inputs.length; i++) {
-        const el = inputs[i];
+    const inputs = document.querySelectorAll('input, select, textarea');
+    inputs.forEach(el => {
         if (el.id && el.type !== 'file' && el.type !== 'submit') {
             formData[el.id] = el.value;
         }
-    }
+    });
     formData['currentTab'] = currentTab;
+    console.log("Data ready to save:", formData);
 
+    // 2. Send to Render
     try {
+        // Double check this URL is exactly correct
         const response = await fetch('https://redbridge.onrender.com/api/save-progress', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -184,7 +183,7 @@ async function saveProgress() {
         });
 
         if (response.ok) {
-            alert(`Progress Saved securely! \n\nA resume link has been sent to ${email}. You can close this window now.`); 
+            alert(`Progress Saved securely!\n\nA resume link has been sent to ${email}. You can close this window now.`); 
             closeModal(); 
         } else {
             throw new Error("Server rejected save request");
@@ -192,12 +191,9 @@ async function saveProgress() {
     } catch (error) {
         console.error("Save Error:", error);
         alert("There was an issue saving to the cloud. We have saved your progress locally on this browser instead.");
-        saveLocalData(); // Fallback to local storage
+        saveLocalData(); 
         closeModal();
-    } finally {
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-    }
+    } 
 }
 
 // --- LOCAL FALLBACK FUNCTIONS ---
