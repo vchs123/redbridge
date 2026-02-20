@@ -1,4 +1,4 @@
-/* --- REDBRIDGE GLOBAL SCRIPTS (Version 44 - UI Feedback & Cache Busting) --- */
+/* --- REDBRIDGE GLOBAL SCRIPTS (Version 45 - Persistent Verification) --- */
 
 // --- GLOBAL VARIABLES ---
 let isEmailVerified = false; 
@@ -100,11 +100,66 @@ document.addEventListener('DOMContentLoaded', function() {
     const accordions = document.querySelectorAll(".accordion-header"); 
     accordions.forEach(acc => { acc.addEventListener("click", function() { this.parentElement.classList.toggle("active"); }); });
 
+    // NEW: Listen for changes to the email field to reset verification
+    document.getElementById('email').addEventListener('input', resetVerificationState);
+
     // Check for resume link on page load
     checkResumeLink();
 });
 
-// --- CLOUD SAVE & RESUME LOGIC (NEW) ---
+// --- VERIFICATION PERSISTENCE LOGIC (NEW) ---
+function restoreVerificationState() {
+    isEmailVerified = true;
+    
+    // Hide the main Verify button
+    const verifyBtn = document.querySelector('.input-with-btn button');
+    if (verifyBtn) verifyBtn.style.display = 'none';
+
+    // Show the OTP box but hide the inputs inside it, leaving only the success message
+    const otpBox = document.getElementById('email-otp');
+    if (otpBox) {
+        otpBox.classList.remove('hidden');
+        const otpInputRow = otpBox.querySelector('.input-with-btn');
+        if (otpInputRow) otpInputRow.style.display = 'none';
+        
+        const msgSpan = document.getElementById('otp-message');
+        if (msgSpan) {
+            msgSpan.style.color = "#4BB543";
+            msgSpan.innerText = "✓ Email Verified Successfully";
+        }
+    }
+}
+
+function resetVerificationState() {
+    if (!isEmailVerified) return; // Only reset if currently verified
+    isEmailVerified = false;
+    
+    // Show the main Verify button again
+    const verifyBtn = document.querySelector('.input-with-btn button');
+    if (verifyBtn) {
+        verifyBtn.style.display = 'inline-block';
+        verifyBtn.innerText = 'Verify';
+    }
+
+    // Hide the OTP box entirely and reset its contents
+    const otpBox = document.getElementById('email-otp');
+    if (otpBox) {
+        otpBox.classList.add('hidden');
+        const otpInputRow = otpBox.querySelector('.input-with-btn');
+        if (otpInputRow) otpInputRow.style.display = 'flex'; 
+        
+        const msgSpan = document.getElementById('otp-message');
+        if (msgSpan) msgSpan.innerText = "";
+        
+        const otpInput = document.getElementById('otpInput');
+        if (otpInput) {
+            otpInput.value = "";
+            otpInput.disabled = false;
+        }
+    }
+}
+
+// --- CLOUD SAVE & RESUME LOGIC ---
 async function checkResumeLink() {
     const urlParams = new URLSearchParams(window.location.search);
     const resumeId = urlParams.get('resume');
@@ -118,6 +173,10 @@ async function checkResumeLink() {
             
             // Re-populate the form
             for (const [key, value] of Object.entries(savedData)) {
+                if (key === 'isEmailVerified' && value === true) {
+                    restoreVerificationState();
+                    continue;
+                }
                 const el = document.getElementById(key);
                 if (el && key !== 'currentTab') { el.value = value; }
             }
@@ -152,7 +211,6 @@ async function checkResumeLink() {
 }
 
 async function saveProgress() { 
-    // Grab the button and update text instantly to show it's working
     const btn = document.getElementById('saveBtn');
     const originalText = btn ? btn.innerText : "Save & Continue Later";
     
@@ -169,7 +227,7 @@ async function saveProgress() {
         btn.disabled = true;
     }
 
-    // 1. Gather data safely 
+    // Gather data safely 
     const formData = {};
     const inputs = document.querySelectorAll('input, select, textarea');
     inputs.forEach(el => {
@@ -178,8 +236,9 @@ async function saveProgress() {
         }
     });
     formData['currentTab'] = currentTab;
+    formData['isEmailVerified'] = isEmailVerified; // NEW: Save verification state
 
-    // 2. Send to Render
+    // Send to Render
     try {
         const response = await fetch('https://redbridge.onrender.com/api/save-progress', {
             method: 'POST',
@@ -216,6 +275,7 @@ function saveLocalData() {
         }
     });
     formData['currentTab'] = currentTab;
+    formData['isEmailVerified'] = isEmailVerified; // NEW: Save verification state locally
     localStorage.setItem('rb_consultation_data', JSON.stringify(formData));
 }
 
@@ -224,6 +284,10 @@ function loadLocalData() {
     if (savedData) {
         const data = JSON.parse(savedData);
         for (const [key, value] of Object.entries(data)) {
+            if (key === 'isEmailVerified' && value === true) {
+                restoreVerificationState();
+                continue;
+            }
             const el = document.getElementById(key);
             if (el && key !== 'currentTab') { el.value = value; }
         }
@@ -368,12 +432,7 @@ async function validateOtp() {
         const result = await response.json();
 
         if (response.ok) {
-            isEmailVerified = true;
-            msgSpan.style.color = "#4BB543"; 
-            msgSpan.innerText = "✓ Email Verified Successfully";
-            document.getElementById('email').disabled = true;
-            document.getElementById('otpInput').disabled = true;
-            document.querySelector('.input-with-btn button').style.display = 'none'; 
+            restoreVerificationState(); // NEW: Triggers the UI change and sets flag
         } else {
             msgSpan.style.color = "red";
             msgSpan.innerText = "⚠ " + result.error;
