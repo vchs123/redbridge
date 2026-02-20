@@ -1,4 +1,4 @@
-/* --- REDBRIDGE GLOBAL SCRIPTS (Version 42 - Fixed) --- */
+/* --- REDBRIDGE GLOBAL SCRIPTS (Version 43 - Save & Resume Enabled) --- */
 
 // --- GLOBAL VARIABLES ---
 let isEmailVerified = false; // Tracks if the user has confirmed their OTP
@@ -31,23 +31,16 @@ const occupations = {
 };
 
 // --- INITIALIZATION ---
-// --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', function() {
     
-    // UPDATED POPULATE FUNCTION
     const populate = (id, list) => { 
         const sel = document.getElementById(id); 
         if (sel) {
-            // 1. Clear existing options
             sel.innerHTML = ''; 
-            
-            // 2. Add the "Default" empty option
             let defaultOpt = document.createElement('option');
-            defaultOpt.value = "";      // This is the key! Value is empty.
+            defaultOpt.value = "";      
             defaultOpt.innerHTML = "Select";
             sel.appendChild(defaultOpt);
-
-            // 3. Add the rest of the items
             list.forEach(item => { 
                 let opt = document.createElement('option'); 
                 opt.value = item; 
@@ -107,28 +100,72 @@ document.addEventListener('DOMContentLoaded', function() {
     const accordions = document.querySelectorAll(".accordion-header"); 
     accordions.forEach(acc => { acc.addEventListener("click", function() { this.parentElement.classList.toggle("active"); }); });
 
-    loadLocalData();
+    // Check for resume link on page load
+    checkResumeLink();
 });
 
-// --- GLOBAL UI FUNCTIONS ---
-function toggleMenu() { document.getElementById('navLinks').classList.toggle('active'); }
-function openModal() { document.getElementById('consultationModal').style.display = 'flex'; }
-function closeModal() { document.getElementById('consultationModal').style.display = 'none'; }
+// --- CLOUD SAVE & RESUME LOGIC (NEW) ---
+async function checkResumeLink() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const resumeId = urlParams.get('resume');
 
-function saveProgress() { 
-    const email = document.getElementById('email').value; 
-    if(!email) {
-        alert("Please enter your email in Step 1 so we can send you the resume link.");
-        showTab(0);
-        document.getElementById('email').focus();
-    } else { 
-        saveLocalData();
-        alert(`Progress Saved! \n\nYour data is saved locally on this browser. In the full version, a secure link would be sent to ${email}.`); 
-        closeModal(); 
-    } 
+    if (resumeId) {
+        try {
+            const response = await fetch(`https://redbridge-api.onrender.com/api/resume/${resumeId}`);
+            if (!response.ok) throw new Error("Link expired or invalid");
+            
+            const savedData = await response.json();
+            
+            // Re-populate the form
+            for (const [key, value] of Object.entries(savedData)) {
+                const el = document.getElementById(key);
+                if (el && key !== 'currentTab') { el.value = value; }
+            }
+            
+            // Trigger UI logic updates
+            handleContactMethod();
+            handleLocationLogic();
+            handleVisaHistoryLogic();
+            handleOccupationLogic();
+            handleEduLogic();
+            handleWorkExpLogic();
+            handleEngLogic();
+            handleVisaExpiryLogic();
+
+            // Jump to the last saved tab
+            if(savedData.currentTab) {
+                currentTab = parseInt(savedData.currentTab);
+                showTab(currentTab);
+            }
+
+            alert("Welcome back! Your progress has been restored.");
+            openModal(); // Open the form modal automatically
+            
+        } catch (error) {
+            console.error("Resume error:", error);
+            alert("Sorry, we couldn't load your saved progress. The link might be expired.");
+        }
+    } else {
+        // Fallback to local storage if no link
+        loadLocalData();
+    }
 }
 
-function saveLocalData() {
+async function saveProgress() { 
+    const email = document.getElementById('email').value; 
+    if(!email) {
+        alert("Please enter your email in Step 1 so we can save your progress securely.");
+        showTab(0);
+        document.getElementById('email').focus();
+        return;
+    } 
+
+    const btn = document.querySelector('button[onclick="saveProgress()"]');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = "Saving...";
+    btn.disabled = true;
+
+    // Gather data
     const formData = {};
     const inputs = document.getElementById('multiStepForm').elements;
     for (let i = 0; i < inputs.length; i++) {
@@ -136,6 +173,40 @@ function saveLocalData() {
         if (el.id && el.type !== 'file' && el.type !== 'submit') {
             formData[el.id] = el.value;
         }
+    }
+    formData['currentTab'] = currentTab;
+
+    try {
+        const response = await fetch('https://redbridge-api.onrender.com/api/save-progress', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: email, data: formData })
+        });
+
+        if (response.ok) {
+            alert(`Progress Saved securely! \n\nA resume link has been sent to ${email}. You can close this window now.`); 
+            closeModal(); 
+        } else {
+            throw new Error("Server rejected save request");
+        }
+    } catch (error) {
+        console.error("Save Error:", error);
+        alert("There was an issue saving to the cloud. We have saved your progress locally on this browser instead.");
+        saveLocalData(); // Fallback to local storage
+        closeModal();
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+}
+
+// --- LOCAL FALLBACK FUNCTIONS ---
+function saveLocalData() {
+    const formData = {};
+    const inputs = document.getElementById('multiStepForm').elements;
+    for (let i = 0; i < inputs.length; i++) {
+        const el = inputs[i];
+        if (el.id && el.type !== 'file' && el.type !== 'submit') { formData[el.id] = el.value; }
     }
     formData['currentTab'] = currentTab;
     localStorage.setItem('rb_consultation_data', JSON.stringify(formData));
@@ -149,17 +220,14 @@ function loadLocalData() {
             const el = document.getElementById(key);
             if (el && key !== 'currentTab') { el.value = value; }
         }
-        handleContactMethod();
-        handleLocationLogic();
-        handleVisaHistoryLogic();
-        handleOccupationLogic();
-        handleEduLogic();
-        handleWorkExpLogic();
-        handleEngLogic();
-        handleVisaExpiryLogic();
+        handleContactMethod(); handleLocationLogic(); handleVisaHistoryLogic(); handleOccupationLogic(); handleEduLogic(); handleWorkExpLogic(); handleEngLogic(); handleVisaExpiryLogic();
     }
 }
 
+// --- GLOBAL UI FUNCTIONS ---
+function toggleMenu() { document.getElementById('navLinks').classList.toggle('active'); }
+function openModal() { document.getElementById('consultationModal').style.display = 'flex'; }
+function closeModal() { document.getElementById('consultationModal').style.display = 'none'; }
 function openQrModal(type) { if(type === 'wechat') document.getElementById('wechat-modal').style.display = 'flex'; if(type === 'tiktok') document.getElementById('tiktok-modal').style.display = 'flex'; }
 function closeQrModal(type) { if(type === 'wechat') document.getElementById('wechat-modal').style.display = 'none'; if(type === 'tiktok') document.getElementById('tiktok-modal').style.display = 'none'; }
 window.onclick = function(event) { if (event.target == document.getElementById('consultationModal')) closeModal(); if (event.target.classList.contains('qr-modal-overlay')) { event.target.style.display = 'none'; } }
@@ -215,15 +283,13 @@ function nextPrev(n) {
 
     currentTab = currentTab + n;
     
-    // --- THIS WAS THE BROKEN PART, NOW FIXED ---
     if (currentTab >= x.length) { 
-        submitForm(); // Just call the function!
+        submitForm(); 
         return false; 
     }
-    // -------------------------------------------
     
     showTab(currentTab);
-    saveLocalData();
+    saveLocalData(); // Still save locally on every "Next" click as a backup
 }
 
 function validateForm() {
@@ -248,10 +314,7 @@ async function verifyField(type) {
     if (type === 'mobile') return; 
 
     const emailValue = document.getElementById('email').value;
-    if (!emailValue) {
-        alert("Please enter an email address first.");
-        return;
-    }
+    if (!emailValue) { alert("Please enter an email address first."); return; }
 
     const btn = document.querySelector('.input-with-btn button');
     const originalText = btn.innerText;
@@ -259,7 +322,7 @@ async function verifyField(type) {
     btn.disabled = true;
 
     try {
-        const response = await fetch('https://redbridge.onrender.com/api/send-email-otp', {
+        const response = await fetch('https://redbridge-api.onrender.com/api/send-email-otp', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: emailValue })
@@ -273,7 +336,7 @@ async function verifyField(type) {
         }
     } catch (error) {
         console.error("OTP Error:", error);
-        alert("Server error. Is 'node server.js' running?");
+        alert("Server error. Please check your connection.");
     } finally {
         btn.innerText = originalText;
         btn.disabled = false;
@@ -286,13 +349,10 @@ async function validateOtp() {
     const code = document.getElementById('otpInput').value;
     const msgSpan = document.getElementById('otp-message');
 
-    if (!code) {
-        alert("Please enter the code sent to your email.");
-        return;
-    }
+    if (!code) { alert("Please enter the code sent to your email."); return; }
 
     try {
-        const response = await fetch('https://redbridge.onrender.com/api/verify-email-otp', {
+        const response = await fetch('https://redbridge-api.onrender.com/api/verify-email-otp', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, code })
@@ -302,10 +362,8 @@ async function validateOtp() {
 
         if (response.ok) {
             isEmailVerified = true;
-            msgSpan.style.color = "#4BB543"; // Success Green
+            msgSpan.style.color = "#4BB543"; 
             msgSpan.innerText = "✓ Email Verified Successfully";
-            
-            // Lock fields and hide verify button
             document.getElementById('email').disabled = true;
             document.getElementById('otpInput').disabled = true;
             document.querySelector('.input-with-btn button').style.display = 'none'; 
@@ -321,59 +379,36 @@ async function validateOtp() {
 
 // --- SUBMIT FUNCTION ---
 async function submitForm() {
-    // 1. SAFETY CHECK (Force Email Verification)
     if (!isEmailVerified) {
         alert("Please verify your email address in Step 1 before submitting.");
-        showTab(0); // Jump back to Step 1
+        showTab(0);
         return;
     }
 
-    // 2. Gather Data
     const formData = {
-        fname: document.getElementById('fname').value,
-        lname: document.getElementById('lname').value,
-        email: document.getElementById('email').value,
-        mobile: document.getElementById('mobile').value,
-        pref_contact: document.getElementById('prefContact').value,
-        whatsapp_val: document.getElementById('whatsappVal')?.value || null,
-        wechat_val: document.getElementById('wechatVal')?.value || null,
-        source: document.getElementById('source').value,
-        budget: document.getElementById('budget').value,
-        gender: document.getElementById('gender').value,
-        nationality: document.getElementById('nationality').value,
-        country_residency: document.getElementById('countryResidency').value,
-        applied_prev: document.getElementById('appliedPrev')?.value || null,
-        location_australia: document.getElementById('locationSelect')?.value || null,
-        willing_relocate: document.getElementById('relocateVal')?.value || null,
-        visa_cancel: document.getElementById('visaCancel').value,
-        dob: document.getElementById('dob').value,
-        prev_visa: document.getElementById('prevVisa').value,
-        curr_visa: document.getElementById('currVisa').value,
-        visa_expiry: document.getElementById('visaExpiry')?.value || null,
-        consult_type: document.getElementById('consultType').value,
-        occ_group: document.getElementById('occGroup').value,
-        edu_level: document.getElementById('eduLevel').value,
-        grad_year: parseInt(document.getElementById('gradYear').value) || null,
-        country_grad: document.getElementById('countryGrad').value,
-        bach_major: document.getElementById('bachMajor')?.value || null,
-        mast_major: document.getElementById('mastMajor')?.value || null,
-        work_exp_years: document.getElementById('workExpYears').value,
-        rel_job_title: document.getElementById('relJobTitle')?.value || null,
-        rel_job_duties: document.getElementById('relJobDuties')?.value || null,
-        lat_job_title: document.getElementById('latJobTitle')?.value || null,
-        lat_job_duties: document.getElementById('latJobDuties')?.value || null,
-        eng_test: document.getElementById('engTest').value,
-        test_date: document.getElementById('testDate')?.value || null,
-        eng_writing: parseInt(document.getElementById('engWriting')?.value) || 0,
-        eng_listening: parseInt(document.getElementById('engListening')?.value) || 0,
-        eng_speaking: parseInt(document.getElementById('engSpeaking')?.value) || 0,
-        eng_reading: parseInt(document.getElementById('engReading')?.value) || 0,
-        eng_overall: parseInt(document.getElementById('engOverall')?.value) || 0
+        fname: document.getElementById('fname').value, lname: document.getElementById('lname').value, email: document.getElementById('email').value,
+        mobile: document.getElementById('mobile').value, pref_contact: document.getElementById('prefContact').value,
+        whatsapp_val: document.getElementById('whatsappVal')?.value || null, wechat_val: document.getElementById('wechatVal')?.value || null,
+        source: document.getElementById('source').value, budget: document.getElementById('budget').value,
+        gender: document.getElementById('gender').value, nationality: document.getElementById('nationality').value,
+        country_residency: document.getElementById('countryResidency').value, applied_prev: document.getElementById('appliedPrev')?.value || null,
+        location_australia: document.getElementById('locationSelect')?.value || null, willing_relocate: document.getElementById('relocateVal')?.value || null,
+        visa_cancel: document.getElementById('visaCancel').value, dob: document.getElementById('dob').value,
+        prev_visa: document.getElementById('prevVisa').value, curr_visa: document.getElementById('currVisa').value,
+        visa_expiry: document.getElementById('visaExpiry')?.value || null, consult_type: document.getElementById('consultType').value,
+        occ_group: document.getElementById('occGroup').value, edu_level: document.getElementById('eduLevel').value,
+        grad_year: parseInt(document.getElementById('gradYear').value) || null, country_grad: document.getElementById('countryGrad').value,
+        bach_major: document.getElementById('bachMajor')?.value || null, mast_major: document.getElementById('mastMajor')?.value || null,
+        work_exp_years: document.getElementById('workExpYears').value, rel_job_title: document.getElementById('relJobTitle')?.value || null,
+        rel_job_duties: document.getElementById('relJobDuties')?.value || null, lat_job_title: document.getElementById('latJobTitle')?.value || null,
+        lat_job_duties: document.getElementById('latJobDuties')?.value || null, eng_test: document.getElementById('engTest').value,
+        test_date: document.getElementById('testDate')?.value || null, eng_writing: parseInt(document.getElementById('engWriting')?.value) || 0,
+        eng_listening: parseInt(document.getElementById('engListening')?.value) || 0, eng_speaking: parseInt(document.getElementById('engSpeaking')?.value) || 0,
+        eng_reading: parseInt(document.getElementById('engReading')?.value) || 0, eng_overall: parseInt(document.getElementById('engOverall')?.value) || 0
     };
 
-    // 3. Send to Server
     try {
-        const response = await fetch('https://redbridge.onrender.com/api/leads', {
+        const response = await fetch('https://redbridge-api.onrender.com/api/leads', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(formData),
@@ -383,215 +418,55 @@ async function submitForm() {
             alert("Thank you! Your professional profile has been submitted and assigned to a RedBridge specialist.");
             localStorage.removeItem('rb_consultation_data');
             closeModal();
+            // Optional: Redirect to a custom thank you page
+            // window.location.href = "thank-you.html";
         } else {
             const result = await response.json();
             throw new Error(result.error || 'Server error');
         }
     } catch (error) {
         console.error('Submission Error:', error);
-        alert("Check if your server is running in the Cursor terminal! (node server.js)");
+        alert("There was an issue submitting your form. Please try again.");
     }
 }
 
 // --- HELPER LOGIC FUNCTIONS ---
 function handleContactMethod() { document.getElementById('field-whatsapp').classList.add('hidden'); document.getElementById('field-wechat').classList.add('hidden'); const val = document.getElementById('prefContact').value; if(val === 'WhatsApp') document.getElementById('field-whatsapp').classList.remove('hidden'); if(val === 'WeChat') document.getElementById('field-wechat').classList.remove('hidden'); }
-
-function handleLocationLogic() { 
-    const country = document.getElementById('countryResidency').value;
-    const locationSelect = document.getElementById('locationSelect');
-    const locationVal = locationSelect.value;
-    
-    if(country === 'Australia') {
-        document.getElementById('field-location').classList.remove('hidden');
-        document.getElementById('field-applied-prev').classList.add('hidden');
-        if(locationVal && locationVal !== 'Melbourne') document.getElementById('field-relocate').classList.remove('hidden'); 
-        else document.getElementById('field-relocate').classList.add('hidden');
-        document.getElementById('field-visa-cancel').classList.remove('hidden');
-        document.getElementById('field-visa-prev').classList.remove('hidden');
-        document.getElementById('field-visa-curr').classList.remove('hidden');
-        handleVisaExpiryLogic(); 
-    } else {
-        document.getElementById('field-location').classList.add('hidden');
-        document.getElementById('field-relocate').classList.remove('hidden'); 
-        document.getElementById('field-applied-prev').classList.remove('hidden'); 
-        handleVisaHistoryLogic();
-    }
-}
-
-function handleVisaExpiryLogic() {
-    const val = document.getElementById('currVisa').value;
-    if(val === 'N/A') document.getElementById('field-visa-expiry').classList.add('hidden');
-    else document.getElementById('field-visa-expiry').classList.remove('hidden');
-}
-
-function handleVisaHistoryLogic() {
-    const country = document.getElementById('countryResidency').value;
-    const applied = document.getElementById('appliedPrev').value;
-    const visaFields = [document.getElementById('field-visa-cancel'), document.getElementById('field-visa-prev'), document.getElementById('field-visa-curr'), document.getElementById('field-visa-expiry')];
-    if (country !== 'Australia') {
-        if (applied === 'No') { visaFields.forEach(el => el.classList.add('hidden')); } 
-        else if (applied === 'Yes') { 
-            visaFields.forEach(el => el.classList.remove('hidden')); 
-            handleVisaExpiryLogic();
-        } 
-        else { visaFields.forEach(el => el.classList.add('hidden')); }
-    }
-}
-
+function handleLocationLogic() { const country = document.getElementById('countryResidency').value; const locationSelect = document.getElementById('locationSelect'); const locationVal = locationSelect.value; if(country === 'Australia') { document.getElementById('field-location').classList.remove('hidden'); document.getElementById('field-applied-prev').classList.add('hidden'); if(locationVal && locationVal !== 'Melbourne') document.getElementById('field-relocate').classList.remove('hidden'); else document.getElementById('field-relocate').classList.add('hidden'); document.getElementById('field-visa-cancel').classList.remove('hidden'); document.getElementById('field-visa-prev').classList.remove('hidden'); document.getElementById('field-visa-curr').classList.remove('hidden'); handleVisaExpiryLogic(); } else { document.getElementById('field-location').classList.add('hidden'); document.getElementById('field-relocate').classList.remove('hidden'); document.getElementById('field-applied-prev').classList.remove('hidden'); handleVisaHistoryLogic(); } }
+function handleVisaExpiryLogic() { const val = document.getElementById('currVisa').value; if(val === 'N/A') document.getElementById('field-visa-expiry').classList.add('hidden'); else document.getElementById('field-visa-expiry').classList.remove('hidden'); }
+function handleVisaHistoryLogic() { const country = document.getElementById('countryResidency').value; const applied = document.getElementById('appliedPrev').value; const visaFields = [document.getElementById('field-visa-cancel'), document.getElementById('field-visa-prev'), document.getElementById('field-visa-curr'), document.getElementById('field-visa-expiry')]; if (country !== 'Australia') { if (applied === 'No') { visaFields.forEach(el => el.classList.add('hidden')); } else if (applied === 'Yes') { visaFields.forEach(el => el.classList.remove('hidden')); handleVisaExpiryLogic(); } else { visaFields.forEach(el => el.classList.add('hidden')); } } }
 function handleOccupationLogic() { document.querySelectorAll('[id^="list-"]').forEach(el => el.classList.add('hidden')); const grp = document.getElementById('occGroup').value.toLowerCase(); const target = document.getElementById('list-' + grp); if(target) target.classList.remove('hidden'); }
-
-function handleEduLogic() { 
-    const lvl = document.getElementById('eduLevel').value; 
-    document.getElementById('field-bach').classList.add('hidden'); 
-    document.getElementById('field-mast').classList.add('hidden'); 
-    if(lvl === "Bachelor's" || lvl === "Master's" || lvl === "Doctorate") {
-        document.getElementById('field-bach').classList.remove('hidden'); 
-    }
-    if(lvl === "Master's" || lvl === "Doctorate") { 
-        document.getElementById('field-mast').classList.remove('hidden'); 
-    }
-}
-
-function handleWorkExpLogic() {
-    const years = document.getElementById('workExpYears').value;
-    if(years === "Less than 1 year") {
-        document.getElementById('job-relevant').classList.add('hidden');
-        document.getElementById('job-latest').classList.remove('hidden');
-        document.getElementById('relJobTitle').removeAttribute('required');
-        document.getElementById('latJobTitle').setAttribute('required', '');
-    } else {
-        document.getElementById('job-relevant').classList.remove('hidden');
-        document.getElementById('job-latest').classList.add('hidden');
-        document.getElementById('latJobTitle').removeAttribute('required');
-        document.getElementById('relJobTitle').setAttribute('required', '');
-    }
-}
-
+function handleEduLogic() { const lvl = document.getElementById('eduLevel').value; document.getElementById('field-bach').classList.add('hidden'); document.getElementById('field-mast').classList.add('hidden'); if(lvl === "Bachelor's" || lvl === "Master's" || lvl === "Doctorate") { document.getElementById('field-bach').classList.remove('hidden'); } if(lvl === "Master's" || lvl === "Doctorate") { document.getElementById('field-mast').classList.remove('hidden'); } }
+function handleWorkExpLogic() { const years = document.getElementById('workExpYears').value; if(years === "Less than 1 year") { document.getElementById('job-relevant').classList.add('hidden'); document.getElementById('job-latest').classList.remove('hidden'); document.getElementById('relJobTitle').removeAttribute('required'); document.getElementById('latJobTitle').setAttribute('required', ''); } else { document.getElementById('job-relevant').classList.remove('hidden'); document.getElementById('job-latest').classList.add('hidden'); document.getElementById('latJobTitle').removeAttribute('required'); document.getElementById('relJobTitle').setAttribute('required', ''); } }
 function handleEngLogic() { const val = document.getElementById('engTest').value; if(val && val !== 'Select' && val !== 'N/A') document.getElementById('engScores').classList.remove('hidden'); else document.getElementById('engScores').classList.add('hidden'); }
-
-function handleSkipLogic() {
-    const val = document.getElementById('continueExtra').value;
-    const btn = document.getElementById('nextBtn');
-    if(val === 'No') btn.innerHTML = "Skip";
-    else btn.innerHTML = "Next";
-}
+function handleSkipLogic() { const val = document.getElementById('continueExtra').value; const btn = document.getElementById('nextBtn'); if(val === 'No') btn.innerHTML = "Skip"; else btn.innerHTML = "Next"; }
 
 function generateSummary() {
     const container = document.getElementById('summary-content');
-    
-    // FORCE VERTICAL STACKING
-    container.style.display = "flex";
-    container.style.flexDirection = "column";
-    container.style.gap = "20px";
-    
+    container.style.display = "flex"; container.style.flexDirection = "column"; container.style.gap = "20px";
     let html = '';
-
-    // Helper to get value safely
-    const getValue = (id) => {
-        const el = document.getElementById(id);
-        return el ? el.value : '';
-    };
+    const getValue = (id) => { const el = document.getElementById(id); return el ? el.value : ''; };
 
     const sections = [
-        {
-            title: "1. Contact Information",
-            fields: [
-                { id: 'fname', label: 'First Name' }, 
-                { id: 'lname', label: 'Last Name' },
-                { id: 'email', label: 'Email' }, 
-                { id: 'mobile', label: 'Mobile' },
-                { id: 'prefContact', label: 'Preferred Contact' },
-                { id: 'whatsappVal', label: 'WhatsApp', showIf: () => getValue('prefContact') === 'WhatsApp' }, 
-                { id: 'wechatVal', label: 'WeChat ID', showIf: () => getValue('prefContact') === 'WeChat' },
-                { id: 'source', label: 'Source' }, 
-                { id: 'budget', label: 'Budget' }
-            ]
-        },
-        {
-            title: "2. Personal Details",
-            fields: [
-                { id: 'gender', label: 'Gender' }, 
-                { id: 'nationality', label: 'Nationality' },
-                { id: 'countryResidency', label: 'Residency' }, 
-                { id: 'appliedPrev', label: 'Applied Previously?' }, 
-                { id: 'locationSelect', label: 'Current Location', showIf: () => getValue('countryResidency') === 'Australia' }, 
-                { id: 'relocateVal', label: 'Willing to Relocate?' }
-            ]
-        },
-        {
-            title: "3. Visa & Consultation",
-            fields: [
-                { id: 'visaCancel', label: 'Visa History' }, 
-                { id: 'dob', label: 'Date of Birth' },
-                { id: 'prevVisa', label: 'Previous Visa' }, 
-                { id: 'currVisa', label: 'Current Visa' },
-                { id: 'visaExpiry', label: 'Visa Expiry' }, 
-                { id: 'consultType', label: 'Consultation Type' },
-                { id: 'occGroup', label: 'Target Industry' },
-                
-                // CONDITIONAL LOGIC ADDED HERE:
-                { id: 'sel-ict', label: 'Occupation (ICT)', showIf: () => getValue('occGroup') === 'ICT' },
-                { id: 'sel-health', label: 'Occupation (Health)', showIf: () => getValue('occGroup') === 'Health' },
-                { id: 'sel-eng', label: 'Occupation (Engineering)', showIf: () => getValue('occGroup') === 'Eng' },
-                { id: 'sel-bus', label: 'Occupation (Business)', showIf: () => getValue('occGroup') === 'Bus' },
-                { id: 'sel-edu', label: 'Occupation (Education)', showIf: () => getValue('occGroup') === 'Edu' },
-                { id: 'sel-mkt', label: 'Occupation (Marketing)', showIf: () => getValue('occGroup') === 'Mkt' }
-            ]
-        },
-        {
-            title: "4. Education History",
-            fields: [
-                { id: 'eduLevel', label: 'Education Level' }, 
-                { id: 'gradYear', label: 'Graduation Year' },
-                { id: 'countryGrad', label: 'Graduation Country' }, 
-                { id: 'bachMajor', label: 'Bachelor Major' }, 
-                { id: 'mastMajor', label: 'Master Major' }
-            ]
-        },
-        {
-            title: "5. Work Experience",
-            fields: [
-                { id: 'workExpYears', label: 'Years of Experience' }, 
-                { id: 'relJobTitle', label: 'Relevant Job Title' },
-                { id: 'relJobDuties', label: 'Relevant Duties' }, 
-                { id: 'latJobTitle', label: 'Latest Job Title' }, 
-                { id: 'latJobDuties', label: 'Latest Duties' },
-                { id: 'resumeUpload', label: 'Resume File', isFile: true }
-            ]
-        },
-        {
-            title: "6. English Proficiency",
-            fields: [
-                { id: 'engTest', label: 'English Test' }, 
-                { id: 'testDate', label: 'Test Date' },
-                { id: 'engWriting', label: 'Writing Score' }, 
-                { id: 'engListening', label: 'Listening Score' },
-                { id: 'engSpeaking', label: 'Speaking Score' }, 
-                { id: 'engReading', label: 'Reading Score' },
-                { id: 'engOverall', label: 'Overall Score' }
-            ]
-        }
+        { title: "1. Contact Information", fields: [{ id: 'fname', label: 'First Name' }, { id: 'lname', label: 'Last Name' }, { id: 'email', label: 'Email' }, { id: 'mobile', label: 'Mobile' }, { id: 'prefContact', label: 'Preferred Contact' }, { id: 'whatsappVal', label: 'WhatsApp', showIf: () => getValue('prefContact') === 'WhatsApp' }, { id: 'wechatVal', label: 'WeChat ID', showIf: () => getValue('prefContact') === 'WeChat' }, { id: 'source', label: 'Source' }, { id: 'budget', label: 'Budget' }] },
+        { title: "2. Personal Details", fields: [{ id: 'gender', label: 'Gender' }, { id: 'nationality', label: 'Nationality' }, { id: 'countryResidency', label: 'Residency' }, { id: 'appliedPrev', label: 'Applied Previously?' }, { id: 'locationSelect', label: 'Current Location', showIf: () => getValue('countryResidency') === 'Australia' }, { id: 'relocateVal', label: 'Willing to Relocate?' }] },
+        { title: "3. Visa & Consultation", fields: [{ id: 'visaCancel', label: 'Visa History' }, { id: 'dob', label: 'Date of Birth' }, { id: 'prevVisa', label: 'Previous Visa' }, { id: 'currVisa', label: 'Current Visa' }, { id: 'visaExpiry', label: 'Visa Expiry' }, { id: 'consultType', label: 'Consultation Type' }, { id: 'occGroup', label: 'Target Industry' }, { id: 'sel-ict', label: 'Occupation (ICT)', showIf: () => getValue('occGroup') === 'ICT' }, { id: 'sel-health', label: 'Occupation (Health)', showIf: () => getValue('occGroup') === 'Health' }, { id: 'sel-eng', label: 'Occupation (Engineering)', showIf: () => getValue('occGroup') === 'Eng' }, { id: 'sel-bus', label: 'Occupation (Business)', showIf: () => getValue('occGroup') === 'Bus' }, { id: 'sel-edu', label: 'Occupation (Education)', showIf: () => getValue('occGroup') === 'Edu' }, { id: 'sel-mkt', label: 'Occupation (Marketing)', showIf: () => getValue('occGroup') === 'Mkt' }] },
+        { title: "4. Education History", fields: [{ id: 'eduLevel', label: 'Education Level' }, { id: 'gradYear', label: 'Graduation Year' }, { id: 'countryGrad', label: 'Graduation Country' }, { id: 'bachMajor', label: 'Bachelor Major' }, { id: 'mastMajor', label: 'Master Major' }] },
+        { title: "5. Work Experience", fields: [{ id: 'workExpYears', label: 'Years of Experience' }, { id: 'relJobTitle', label: 'Relevant Job Title' }, { id: 'relJobDuties', label: 'Relevant Duties' }, { id: 'latJobTitle', label: 'Latest Job Title' }, { id: 'latJobDuties', label: 'Latest Duties' }, { id: 'resumeUpload', label: 'Resume File', isFile: true }] },
+        { title: "6. English Proficiency", fields: [{ id: 'engTest', label: 'English Test' }, { id: 'testDate', label: 'Test Date' }, { id: 'engWriting', label: 'Writing Score' }, { id: 'engListening', label: 'Listening Score' }, { id: 'engSpeaking', label: 'Speaking Score' }, { id: 'engReading', label: 'Reading Score' }, { id: 'engOverall', label: 'Overall Score' }] }
     ];
 
     sections.forEach(section => {
         const validFields = section.fields.filter(f => {
             const el = document.getElementById(f.id);
-            
-            // 1. Basic Check: Does element exist?
             if (!el) return false;
-
-            // 2. Logic Check: Does it pass the 'showIf' condition? (If no condition exists, assume true)
             if (f.showIf && !f.showIf()) return false;
-
-            // 3. Value Check: Is it empty or "Select"?
             return el.value && el.value.trim() !== "" && !el.value.toLowerCase().includes("select");
         });
 
         if (validFields.length > 0) {
             html += `<div style="width: 100%; border-bottom: 1px solid #444; padding-bottom: 15px;">
-                        <h4 style="color: #E65400; font-size: 1rem; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 1px;">
-                            ${section.title}
-                        </h4>
+                        <h4 style="color: #E65400; font-size: 1rem; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 1px;">${section.title}</h4>
                         <div style="display: flex; flex-direction: column; gap: 8px;">`;
             
             validFields.forEach(f => {
@@ -604,15 +479,10 @@ function generateSummary() {
                             <span style="color: #ffffff; font-weight: 600; width: 55%; text-align: right; word-break: break-word;">${value}</span>
                          </div>`;
             });
-
-            html += `   </div>
-                     </div>`;
+            html += `</div></div>`;
         }
     });
 
-    if (html === "") {
-        html = `<p style="text-align:center; color:#888;">No details provided yet.</p>`;
-    }
-
+    if (html === "") html = `<p style="text-align:center; color:#888;">No details provided yet.</p>`;
     container.innerHTML = html;
 }
