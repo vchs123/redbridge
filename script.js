@@ -199,11 +199,13 @@ async function saveProgress() {
 // --- LOCAL FALLBACK FUNCTIONS ---
 function saveLocalData() {
     const formData = {};
-    const inputs = document.getElementById('multiStepForm').elements;
-    for (let i = 0; i < inputs.length; i++) {
-        const el = inputs[i];
-        if (el.id && el.type !== 'file' && el.type !== 'submit') { formData[el.id] = el.value; }
-    }
+    // Grab all inputs directly instead of relying on a specific Form ID
+    const inputs = document.querySelectorAll('input, select, textarea');
+    inputs.forEach(el => {
+        if (el.id && el.type !== 'file' && el.type !== 'submit') { 
+            formData[el.id] = el.value; 
+        }
+    });
     formData['currentTab'] = currentTab;
     localStorage.setItem('rb_consultation_data', JSON.stringify(formData));
 }
