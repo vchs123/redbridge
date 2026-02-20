@@ -444,6 +444,7 @@ async function validateOtp() {
 }
 
 // --- SUBMIT FUNCTION ---
+// --- SUBMIT FUNCTION (UPDATED FOR FILES) ---
 async function submitForm() {
     if (!isEmailVerified) {
         alert("Please verify your email address in Step 1 before submitting.");
@@ -451,7 +452,8 @@ async function submitForm() {
         return;
     }
 
-    const formData = {
+    // 1. Gather all the text data
+    const leadData = {
         fname: document.getElementById('fname').value, lname: document.getElementById('lname').value, email: document.getElementById('email').value,
         mobile: document.getElementById('mobile').value, pref_contact: document.getElementById('prefContact').value,
         whatsapp_val: document.getElementById('whatsappVal')?.value || null, wechat_val: document.getElementById('wechatVal')?.value || null,
@@ -473,11 +475,20 @@ async function submitForm() {
         eng_reading: parseInt(document.getElementById('engReading')?.value) || 0, eng_overall: parseInt(document.getElementById('engOverall')?.value) || 0
     };
 
+    // 2. Package it into a FormData object so we can attach the file
+    const payload = new FormData();
+    payload.append('leadData', JSON.stringify(leadData)); // Send text as JSON string
+
+    const fileInput = document.getElementById('resumeUpload');
+    if (fileInput && fileInput.files.length > 0) {
+        payload.append('resumeFile', fileInput.files[0]); // Attach the physical file
+    }
+
     try {
         const response = await fetch('https://redbridge.onrender.com/api/leads', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(formData),
+            // Notice: We DO NOT set 'Content-Type'. The browser handles it automatically for files!
+            body: payload,
         });
 
         if (response.ok) {
