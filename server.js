@@ -9,22 +9,18 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Configure Multer to hold files in memory temporarily before sending to Supabase (Max 5MB)
+// Configure Multer to hold files in memory temporarily before sending to Supabase (Max 2MB)
 const upload = multer({ 
     storage: multer.memoryStorage(),
     limits: { fileSize: 2 * 1024 * 1024 }, // 2MB Limit
     fileFilter: (req, file, cb) => {
-        // Allowed file extensions
-        const allowedTypes = /pdf|doc|docx/;
+        // Checking the file name extension directly is much safer across different browsers
+        const allowedExtensions = /\.(pdf|doc|docx)$/i;
         
-        // Check the extension and the mime type
-        const extname = allowedTypes.test(file.originalname.toLowerCase());
-        const mimetype = allowedTypes.test(file.mimetype);
-
-        if (extname && mimetype) {
-            return cb(null, true);
+        if (allowedExtensions.test(file.originalname)) {
+            cb(null, true);
         } else {
-            cb(new Error('Only PDF, DOC and DOCX files are allowed!'));
+            cb(null, false); // Silently rejects bad files so the server doesn't crash
         }
     }
 });
@@ -207,7 +203,7 @@ app.post('/api/apply', upload.single('resumeFile'), async (req, res) => {
         const data = req.body;
         
         // Ensure they actually uploaded a resume (we made it required)
-        if (!req.file) throw new Error("Resume file is required");
+        if (!req.file) throw new Error("Please attach a valid PDF, DOC or DOCX resume (Max 2MB).");
         const resumeUrl = await uploadToSupabase(req.file, 'job_applications');
 
         const { error } = await supabase.from('job_applications').insert([{

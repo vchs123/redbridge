@@ -336,7 +336,8 @@
                 }
             } catch(err) {
                 console.error(err);
-                alert("An error occurred. Make sure your file is under 5MB and try again.");
+                // This will now display the ACTUAL error from the server or database
+                alert("Upload Failed: " + err.message); 
             } finally {
                 btn.innerText = "Submit Application";
                 btn.disabled = false;
