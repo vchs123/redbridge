@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | The Siddeley Group</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="portal.css">
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2>The Siddeley Group</h2>
+            <p>Admin Portal</p>
+        </div>
+
+        <nav class="nav-menu">
+            <a href="dashboard.html" class="nav-item active"><i class="fas fa-home"></i> Overview</a>
+            
+            <div class="nav-category">Pipelines</div>
+            <a href="#" class="nav-item"><i class="fas fa-funnel-dollar"></i> Sales Leads</a>
+            <a href="#" class="nav-item"><i class="fas fa-folder-open"></i> CRM Cases</a>
+            <a href="#" class="nav-item"><i class="fas fa-users"></i> HR Applicants</a>
+
+            <div class="nav-category">Analytics</div>
+            <a href="#" class="nav-item"><i class="fas fa-chart-line"></i> Marketing Data</a>
+            
+            <div class="nav-category">Super Admin</div>
+            <a href="#" class="nav-item"><i class="fas fa-user-shield"></i> User Management</a>
+            <a href="#" class="nav-item"><i class="fas fa-history"></i> Audit Logs</a>
+            <a href="#" class="nav-item"><i class="fas fa-cog"></i> System Settings</a>
+        </nav>
+
+        <div class="user-profile-widget">
+            <div class="avatar"><i class="fas fa-user"></i></div>
+            <div class="user-details">
+                <div class="user-name" id="sidebarUserName">Loading...</div> 
+                <div class="user-role">Employee</div>
+            </div>
+            <button class="logout-btn" onclick="logout()" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-header">
+            <div class="header-title">Overview Dashboard</div>
+            <div style="font-size: 0.85rem; color: var(--text-gray);">
+                <i class="far fa-calendar-alt"></i> <span id="currentDate"></span>
+            </div>
+        </header>
+
+        <div class="content-area">
+            <div class="metric-grid">
+                <div class="metric-card">
+                    <h4>New Sales Leads</h4>
+                    <div class="metric-value" style="color: #4CAF50;">14</div>
+                </div>
+                <div class="metric-card">
+                    <h4>Active CRM Cases</h4>
+                    <div class="metric-value" style="color: #2196F3;">89</div>
+                </div>
+                <div class="metric-card">
+                    <h4>Pending HR Apps</h4>
+                    <div class="metric-value" style="color: var(--primary-orange);">6</div>
+                </div>
+            </div>
+            
+            <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 30px; text-align: center; color: var(--text-gray);">
+                <i class="fas fa-hammer" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                <h3>Workspace Under Construction</h3>
+                <p>Data tables and pipeline boards will populate here based on user access levels.</p>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="auth.js"></script>
+
+    <script>
+        // IMMEDIATELY CHECK SECURITY BEFORE SHOWING THE PAGE
+        checkAuth();
+
+        // Set the current date
+        document.getElementById('currentDate').innerText = new Date().toLocaleDateString('en-AU', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+        // Connect logout button
+        function logout() {
+            logoutUser();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | The Siddeley Group</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="portal.css">
+</head>
+<body>
+
+    <div class="login-container">
+        <div class="login-box">
+            <h1>The Siddeley <span>Group</span></h1>
+            <p>Internal Employee Portal</p>
+            
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>Corporate Email</label>
+                    <input type="email" id="email" required placeholder="name@red-bridge.com.au">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="password" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn-login">Sign In</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="auth.js"></script>
+
+    <script>
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const btn = document.querySelector('.btn-login');
+
+            btn.innerText = "Authenticating...";
+            btn.disabled = true;
+
+            try {
+                // Call the login function from auth.js
+                await loginUser(email, password);
+                
+                // If successful, redirect to the dashboard!
+                window.location.href = "dashboard.html";
+            } catch (error) {
+                alert("Login Failed: " + error.message);
+                btn.innerText = "Sign In";
+                btn.disabled = false;
+            }
+        }
+
+        // Auto-redirect to dashboard if they are ALREADY logged in
+        window.onload = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) window.location.href = "dashboard.html";
+        }
+    </script>
+</body>
+</html>
