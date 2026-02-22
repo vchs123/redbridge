@@ -6,25 +6,43 @@
     <title>Login | The Siddeley Group</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="portal.css">
+    <style>
+        /* A quick helper class to hide forms */
+        .hidden { display: none !important; }
+    </style>
 </head>
 <body>
 
     <div class="login-container">
         <div class="login-box">
             <h1>The Siddeley <span>Group</span></h1>
-            <p>Internal Employee Portal</p>
             
-            <form id="loginForm" onsubmit="handleLogin(event)">
-                <div class="form-group">
-                    <label>Corporate Email</label>
-                    <input type="email" id="email" required placeholder="name@red-bridge.com.au">
-                </div>
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" id="password" required placeholder="••••••••">
-                </div>
-                <button type="submit" class="btn-login">Sign In</button>
-            </form>
+            <div id="loginSection">
+                <p>Internal Employee Portal</p>
+                <form id="loginForm" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label>Corporate Email</label>
+                        <input type="email" id="email" required placeholder="name@red-bridge.com.au">
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="password" required placeholder="••••••••">
+                    </div>
+                    <button type="submit" class="btn-login" id="loginBtn">Sign In</button>
+                </form>
+            </div>
+
+            <div id="setPasswordSection" class="hidden">
+                <p style="color: var(--primary-orange); font-weight: 600;">Welcome! Please set your password.</p>
+                <form id="setPasswordForm" onsubmit="handleSetPassword(event)">
+                    <div class="form-group">
+                        <label>New Password</label>
+                        <input type="password" id="newPassword" required placeholder="At least 6 characters" minlength="6">
+                    </div>
+                    <button type="submit" class="btn-login" id="setPwdBtn">Save & Enter Portal</button>
+                </form>
+            </div>
+
         </div>
     </div>
 
@@ -32,20 +50,33 @@
     <script src="auth.js"></script>
 
     <script>
+        // 1. CHECK THE URL WHEN THE PAGE LOADS
+        window.onload = async () => {
+            // If the URL has an invite or recovery token, show the Set Password form!
+            const hash = window.location.hash;
+            if (hash && (hash.includes("type=invite") || hash.includes("type=recovery"))) {
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('setPasswordSection').classList.remove('hidden');
+                return; // Stop here, don't auto-redirect to dashboard yet
+            }
+
+            // Otherwise, if they are already logged in normally, send them straight to the dashboard
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) window.location.href = "dashboard.html";
+        }
+
+        // 2. NORMAL LOGIN
         async function handleLogin(e) {
             e.preventDefault();
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            const btn = document.querySelector('.btn-login');
+            const btn = document.getElementById('loginBtn');
 
             btn.innerText = "Authenticating...";
             btn.disabled = true;
 
             try {
-                // Call the login function from auth.js
                 await loginUser(email, password);
-                
-                // If successful, redirect to the dashboard!
                 window.location.href = "dashboard.html";
             } catch (error) {
                 alert("Login Failed: " + error.message);
@@ -54,10 +85,27 @@
             }
         }
 
-        // Auto-redirect to dashboard if they are ALREADY logged in
-        window.onload = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session) window.location.href = "dashboard.html";
+        // 3. SET NEW PASSWORD
+        async function handleSetPassword(e) {
+            e.preventDefault();
+            const newPassword = document.getElementById('newPassword').value;
+            const btn = document.getElementById('setPwdBtn');
+
+            btn.innerText = "Saving...";
+            btn.disabled = true;
+
+            try {
+                // Because clicking the invite link technically logged them in temporarily,
+                // we can just update the user's password directly!
+                await updateUserPassword(newPassword);
+                
+                alert("Password set successfully! Welcome to the portal.");
+                window.location.href = "dashboard.html";
+            } catch (error) {
+                alert("Failed to set password: " + error.message);
+                btn.innerText = "Save & Enter Portal";
+                btn.disabled = false;
+            }
         }
     </script>
 </body>

@@ -8,6 +8,18 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 // Initialize the Supabase Client
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// --- SET/UPDATE PASSWORD FUNCTION ---
+async function updateUserPassword(newPassword) {
+    const { data, error } = await supabase.auth.updateUser({
+        password: newPassword
+    });
+
+    if (error) {
+        throw error;
+    }
+    return data;
+}
+
 // --- LOGIN FUNCTION ---
 async function loginUser(email, password) {
     const { data, error } = await supabase.auth.signInWithPassword({
