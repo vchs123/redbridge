@@ -95,14 +95,19 @@
             btn.disabled = true;
 
             try {
-                // Because clicking the invite link technically logged them in temporarily,
-                // we can just update the user's password directly!
-                await updateUserPassword(newPassword);
+                // BYPASS THE CACHED SCRIPT: Talk to Supabase directly right here!
+                const { data, error } = await supabase.auth.updateUser({
+                    password: newPassword
+                });
+
+                if (error) throw error;
                 
                 alert("Password set successfully! Welcome to the portal.");
                 window.location.href = "dashboard.html";
             } catch (error) {
                 alert("Failed to set password: " + error.message);
+                console.error(error);
+            } finally {
                 btn.innerText = "Save & Enter Portal";
                 btn.disabled = false;
             }
