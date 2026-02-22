@@ -8,18 +8,6 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 // Initialize the Supabase Client
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// --- SET/UPDATE PASSWORD FUNCTION ---
-async function updateUserPassword(newPassword) {
-    const { data, error } = await supabase.auth.updateUser({
-        password: newPassword
-    });
-
-    if (error) {
-        throw error;
-    }
-    return data;
-}
-
 // --- LOGIN FUNCTION ---
 async function loginUser(email, password) {
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -41,19 +29,27 @@ async function logoutUser() {
 
 // --- SECURITY GUARD FUNCTION (Protects the Dashboard) ---
 async function checkAuth() {
-    // Check if there is an active logged-in session
     const { data: { session } } = await supabase.auth.getSession();
     
     if (!session) {
-        // KICK THEM OUT: No session found, redirect to login page
         window.location.href = "index.html";
     } else {
-        // ALLOWED IN: Display their email in the sidebar
         const userEmail = session.user.email;
         const userNameElement = document.getElementById('sidebarUserName');
         if(userNameElement) {
-            // Display everything before the @ symbol as their name for now
             userNameElement.innerText = userEmail.split('@')[0];
         }
     }
+}
+
+// --- SET/UPDATE PASSWORD FUNCTION ---
+async function updateUserPassword(newPassword) {
+    const { data, error } = await supabase.auth.updateUser({
+        password: newPassword
+    });
+
+    if (error) {
+        throw error;
+    }
+    return data;
 }
